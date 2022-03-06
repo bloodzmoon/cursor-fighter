@@ -5,6 +5,7 @@ const createApp = () => {
   const app = new PIXI.Application({
     width: AppSize.WIDTH,
     height: AppSize.HEIGHT,
+    backgroundColor: 0xffffff,
   })
   const background = new PIXI.Graphics()
   background

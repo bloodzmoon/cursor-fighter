@@ -1,30 +1,35 @@
 :root {
-  --dark100: #777;
-  --dark500: #1a1a1a;
+    --light100: #ddd;
+
+    --dark100: #777;
+    --dark400: #333;
+    --dark500: #1a1a1a;
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background: var(--dark500);
-  user-select: none;
+    margin: 0;
+    padding: 0;
+    background: var(--dark500);
+    user-select: none;
 }
 
 #app {
-  width: 100vw;
-  height: 100vh;
-  background-image: radial-gradient(var(--dark100) 5%, var(--dark500) 5%);
-  background-position: 0 0;
-  background-size: 40px 40px;
+    width: 100vw;
+    height: 100vh;
+    background-image: radial-gradient(var(--dark100) 5%, var(--dark500) 5%);
+    background-position: 0 0;
+    background-size: 40px 40px;
 
-  display: grid;
-  place-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 canvas {
-  outline: 6px solid var(--dark100);
+    outline: 6px solid var(--dark400);
+    border-radius: 1rem;
 }

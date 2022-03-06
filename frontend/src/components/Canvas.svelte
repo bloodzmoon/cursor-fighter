@@ -6,6 +6,6 @@
 
   onMount(() => {
     const appContainer = document.getElementById('app')
-    appContainer.appendChild($appContext.view)
+    appContainer.prepend($appContext.view)
   })
 </script>
