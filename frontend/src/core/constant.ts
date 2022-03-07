@@ -5,6 +5,7 @@ export enum AppSize {
 
 export enum AppLayer {
   BACKGROUND = 1,
+  GAME_OBJECT = 5,
   OVERLAY = 20,
   CONTROLLER = 30,
 }
@@ -19,6 +20,9 @@ export enum ButtonCode {
   ARROW_RIGHT,
   ARROW_DOWN,
   ARROW_LEFT,
+
+  ANALOG_LEFT,
+  ANALOG_RIGHT,
 
   TOP_LEFT,
   TOP_RIGHT,

@@ -3,7 +3,7 @@
   import * as PIXI from 'pixi.js'
 
   import { appCtx } from 'core/app'
-  import { AppSize, AppLayer } from 'core/constant'
+  import { AppSize, AppLayer, ButtonCode } from 'core/constant'
   import Button from 'components/Button.svelte'
   import ControllerStick from './ControllerStick.svelte'
 
@@ -105,11 +105,13 @@
 <!-- Stick control -->
 <ControllerStick
   layer={AppLayer.CONTROLLER + 1}
+  code={ButtonCode.ANALOG_LEFT}
   sprite={btnStickImg}
   position={[LEFT_PAD[0] + 79, LEFT_PAD[1] + 72]}
 />
 <ControllerStick
   layer={AppLayer.CONTROLLER + 1}
+  code={ButtonCode.ANALOG_RIGHT}
   sprite={btnStickImg}
   position={[RIGHT_PAD[0] - 77, RIGHT_PAD[1] + 70]}
 />

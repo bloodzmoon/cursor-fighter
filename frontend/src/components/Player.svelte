@@ -1,119 +1,55 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { clamp } from 'lodash'
   import * as PIXI from 'pixi.js'
   import vec2 from 'gl-vec2'
 
-  import { appCtx } from '../core/app'
-  import { AppSize } from 'core/constant'
-  import cursor01 from '../assets/cursor01.png'
+  import { appCtx } from 'core/app'
+  import { AppLayer, AppSize, ButtonCode } from 'core/constant'
 
-  let isClicked = false
-  let isInScreen = false
-  let mX = 0
-  let mY = 0
+  import cursor01 from 'assets/cursor01.png'
+  import { controllerCtx } from 'core/controller'
 
-  let clickX = 0
-  let clickY = 0
-
-  let maxVelocity = 1.6
-  let playerSpeed = 0.1
-  let playerRotateSpeed = 0.02
-  let playerVelocity = [0, 0]
+  let self = PIXI.Sprite.from(cursor01)
+  let speed = 0.1
+  let friction = 0.02 // 0 - 1
+  let velocity = [0, 0]
+  let maxVelocity = 2
 
   onMount(() => {
-    const player = PIXI.Sprite.from(cursor01)
-    player.x = AppSize.WIDTH / 2
-    player.y = AppSize.HEIGHT / 2
-    player.anchor.set(0.5, 0.5)
-    $appCtx.stage.addChild(player)
+    self.zIndex = AppLayer.GAME_OBJECT
+    self.x = AppSize.WIDTH / 2
+    self.y = AppSize.HEIGHT / 2
+    self.anchor.set(0.5, 0.5)
 
-    const playerName = new PIXI.Text('bloodzmmon', {
-      fontSize: 11,
-      fill: 'lightskyblue',
-    })
-    playerName.anchor.set(0.5, 0.5)
-    playerName.x = player.x
-    playerName.y = player.y + 30
-    $appCtx.stage.addChild(playerName)
+    $appCtx.stage.addChild(self)
+    $appCtx.ticker.add(handlePlayerMovement)
+  })
+
+  function handlePlayerMovement() {
+    // player rotation
+    self.rotation = $controllerCtx[ButtonCode.ANALOG_RIGHT]
 
     // player movement
-    $appCtx.ticker.add(() => {
-      if (isClicked) {
-        const delta = vec2.sub([], [clickX, clickY], [player.x, player.y])
-        const length = vec2.len(delta)
-        if (length > 10 * 2) {
-          vec2.normalize(delta, delta)
-          vec2.scaleAndAdd(playerVelocity, playerVelocity, delta, playerSpeed)
-        }
-      }
+    const analogPos = $controllerCtx[ButtonCode.ANALOG_LEFT]
+    const controlPos = vec2.add([], analogPos, [self.x, self.y])
+    const delta = vec2.sub([], controlPos, [self.x, self.y])
+    vec2.normalize(delta, delta)
+    vec2.scaleAndAdd(velocity, velocity, delta, speed)
 
-      if (player.x < 0 || player.x > AppSize.WIDTH) {
-        player.x = Math.max(0, Math.min(AppSize.WIDTH, player.x))
-        playerVelocity[0] *= -1
-      }
-      if (player.y < 0 || player.y > AppSize.HEIGHT) {
-        player.y = Math.max(0, Math.min(AppSize.HEIGHT, player.y))
-        playerVelocity[1] *= -1
-      }
-      playerVelocity[0] = Math.max(
-        -maxVelocity,
-        Math.min(maxVelocity, playerVelocity[0])
-      )
-      playerVelocity[1] = Math.max(
-        -maxVelocity,
-        Math.min(maxVelocity, playerVelocity[1])
-      )
-      playerVelocity[0] *= 0.98
-      playerVelocity[1] *= 0.98
-      player.x += playerVelocity[0]
-      player.y += playerVelocity[1]
-      playerName.x = player.x
-      playerName.y = player.y + 30
-    })
-
-    // player rotation
-    $appCtx.ticker.add(() => {
-      player.rotation += playerRotateSpeed * 0.98
-    })
-
-    $appCtx.stage.on('mousedown', (e: PIXI.InteractionEvent) => {
-      isClicked = true
-
-      let pos = e.data.global
-      clickX = pos.x
-      clickY = pos.y
-    })
-    $appCtx.stage.on('mouseup', () => {
-      isClicked = false
-    })
-    $appCtx.stage.on('mouseover', () => {
-      isInScreen = true
-    })
-    $appCtx.stage.on('mouseout', () => {
-      isInScreen = false
-    })
-    $appCtx.stage.on('pointermove', (e: PIXI.InteractionEvent) => {
-      let pos = e.data.global
-      mX = pos.x
-      mY = pos.y
-
-      if (!isClicked) return
-      clickX = pos.x
-      clickY = pos.y
-    })
-  })
-</script>
-
-<p>
-  FPS: {$appCtx.ticker.FPS.toFixed(2)} isInScreen: {isInScreen} / isClick: {isClicked}
-  / X: {mX} / Y: {mY}
-</p>
-
-<style>
-  p {
-    color: white;
-    position: absolute;
-    top: 20px;
-    left: 20px;
+    if (self.x < 0 || self.x > AppSize.WIDTH) {
+      self.x = clamp(self.x, 0, AppSize.WIDTH)
+      velocity[0] *= -1
+    }
+    if (self.y < 0 || self.y > AppSize.HEIGHT) {
+      self.y = clamp(self.y, 0, AppSize.HEIGHT)
+      velocity[1] *= -1
+    }
+    velocity[0] = clamp(velocity[0], -maxVelocity, maxVelocity)
+    velocity[1] = clamp(velocity[1], -maxVelocity, maxVelocity)
+    velocity[0] *= 1 - friction
+    velocity[1] *= 1 - friction
+    self.x += velocity[0]
+    self.y += velocity[1]
   }
-</style>
+</script>

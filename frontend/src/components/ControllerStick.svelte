@@ -4,8 +4,10 @@
   import vec2 from 'gl-vec2'
 
   import { appCtx } from 'core/app'
-  import { AppLayer } from 'core/constant'
+  import { AppLayer, ButtonCode } from 'core/constant'
+  import { controllerCtx } from 'core/controller'
 
+  export let code: ButtonCode
   export let sprite: string
   export let position: number[]
   export let layer = AppLayer.CONTROLLER
@@ -14,7 +16,7 @@
 
   let isDragging = false
   let self: PIXI.Sprite
-  let data: PIXI.InteractionData
+  let mousePos: PIXI.Point
 
   onMount(() => {
     self = PIXI.Sprite.from(sprite)
@@ -36,31 +38,43 @@
 
   function handleDragStart(e: PIXI.InteractionEvent) {
     isDragging = true
-    data = e.data
+    mousePos = e.data.global
   }
 
   function handleDragEnd() {
     isDragging = false
     self.position.set(position[0], position[1])
+
+    // Update controller context
+    if (code === ButtonCode.ANALOG_LEFT) {
+      $controllerCtx[code] = [0, 0]
+    }
   }
 
   function handleDragMove() {
     if (!isDragging) return
 
-    const mousePos = data.global
     const diff = vec2.sub([], [mousePos.x, mousePos.y], position)
     const diffLength = vec2.len(diff)
+    $controllerCtx[code] = diff
 
     if (diffLength > DRAG_RADIUS) {
       const radians = Math.atan2(
         mousePos.y - position[1],
         mousePos.x - position[0]
       )
-      const limitedX = Math.cos(radians) * DRAG_RADIUS + position[0]
-      const limitedY = Math.sin(radians) * DRAG_RADIUS + position[1]
-      self.position.set(limitedX, limitedY)
+      const borderedX = Math.cos(radians) * DRAG_RADIUS + position[0]
+      const borderedY = Math.sin(radians) * DRAG_RADIUS + position[1]
+      self.position.set(borderedX, borderedY)
     } else {
       self.position.set(mousePos.x, mousePos.y)
+    }
+
+    // Update controller context
+    if (code === ButtonCode.ANALOG_LEFT) {
+      $controllerCtx[code] = diff
+    } else if (code === ButtonCode.ANALOG_RIGHT) {
+      $controllerCtx[code] = Math.atan2(diff[1], diff[0])
     }
   }
 </script>

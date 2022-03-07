@@ -6,4 +6,4 @@
 
 <Monitor />
 <Controller />
-<!-- <Player /> -->
+<Player />
