@@ -20,6 +20,7 @@
   import btnTopRightImg from 'assets/btn_top_r.png'
   import btnMenuImg from 'assets/btn_sel.png'
   import btnStickImg from 'assets/stick.png'
+  import { controllerCtx } from 'core/controller'
 
   const RIGHT_PAD = [AppSize.WIDTH / 2 + 158, AppSize.HEIGHT + 12]
   const LEFT_PAD = [AppSize.WIDTH / 2 - 158, AppSize.HEIGHT + 12]
@@ -34,6 +35,10 @@
 
     $appCtx.stage.addChild(controller)
   })
+
+  function handleButtonClick(code: ButtonCode) {
+    $controllerCtx[code] = true
+  }
 </script>
 
 <!-- Right pad -->
@@ -56,6 +61,7 @@
   layer={AppLayer.CONTROLLER + 1}
   sprite={btn4Img}
   position={[RIGHT_PAD[0] - BTN_PAD_GAP, RIGHT_PAD[1]]}
+  onClick={() => handleButtonClick(ButtonCode.SQUARE)}
 />
 
 <!-- Left pad -->

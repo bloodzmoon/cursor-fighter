@@ -1,3 +1,5 @@
+import type * as PIXI from 'pixi.js'
+
 export enum AppSize {
   WIDTH = 1000,
   HEIGHT = 560,
@@ -37,5 +39,15 @@ export enum MonitorStage {
   CREATE_FIGHTER,
   ROOM_LIST,
   LOBBY,
-  PLAYING,
+  PLAYING_FFA,
+}
+
+export enum AttackType {
+  BULLET,
+}
+
+export type IAttack = {
+  type: AttackType
+  velocity: number[]
+  object: PIXI.Sprite
 }

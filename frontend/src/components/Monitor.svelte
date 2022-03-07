@@ -8,8 +8,9 @@
   import btnImg from 'assets/btn_sel.png'
   import blackImg from 'assets/black.png'
 
-  import SceneCreateFighter from './SceneCreateFighter.svelte'
   import Button from './Button.svelte'
+  import SceneCreateFighter from './SceneCreateFighter.svelte'
+  import SceneFFA from './SceneFFA.svelte'
 
   $: renderBlackScreen($monitorCtx.isActive)
   let blackScreen = PIXI.Sprite.from(blackImg)
@@ -46,6 +47,8 @@
 />
 {#if $monitorCtx.stage === MonitorStage.CREATE_FIGHTER}
   <SceneCreateFighter />
+{:else if $monitorCtx.stage === MonitorStage.PLAYING_FFA}
+  <SceneFFA />
 {/if}
 
 <style>

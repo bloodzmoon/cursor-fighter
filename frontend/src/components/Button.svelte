@@ -3,7 +3,7 @@
   import * as PIXI from 'pixi.js'
 
   import { appCtx } from 'core/app'
-  import { AppLayer } from 'core/constant'
+  import { AppLayer, ButtonCode } from 'core/constant'
 
   export let sprite: string
   export let position: number[]

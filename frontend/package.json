@@ -23,6 +23,7 @@
     "vite-tsconfig-paths": "^3.4.1"
   },
   "dependencies": {
+    "@pixi/filter-motion-blur": "4.1.5",
     "gl-vec2": "1.3.0",
     "lodash": "4.17.21",
     "pixi.js": "6.2.2"
