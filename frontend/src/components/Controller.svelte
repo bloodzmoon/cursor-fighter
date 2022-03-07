@@ -2,9 +2,10 @@
   import { onMount } from 'svelte'
   import * as PIXI from 'pixi.js'
 
-  import { appCtx, AppSize } from 'core/context'
-  import { ButtonCode } from 'core/buttonCode'
-  import ControllerButton from 'components/ControllerButton.svelte'
+  import { appCtx } from 'core/app'
+  import { AppSize, AppLayer } from 'core/constant'
+  import Button from 'components/Button.svelte'
+  import ControllerStick from './ControllerStick.svelte'
 
   import controllerImg from 'assets/controller.png'
   import btn1Img from 'assets/btn1.png'
@@ -19,7 +20,6 @@
   import btnTopRightImg from 'assets/btn_top_r.png'
   import btnMenuImg from 'assets/btn_sel.png'
   import btnStickImg from 'assets/stick.png'
-  import ControllerStick from './ControllerStick.svelte'
 
   const RIGHT_PAD = [AppSize.WIDTH / 2 + 158, AppSize.HEIGHT + 12]
   const LEFT_PAD = [AppSize.WIDTH / 2 - 158, AppSize.HEIGHT + 12]
@@ -30,84 +30,86 @@
     controller.position.set(AppSize.WIDTH / 2, AppSize.HEIGHT)
     controller.anchor.set(0.5, 0.25)
     controller.scale.set(0.5)
-    controller.zIndex = 1
+    controller.zIndex = AppLayer.CONTROLLER
 
     $appCtx.stage.addChild(controller)
   })
 </script>
 
 <!-- Right pad -->
-<ControllerButton
-  code={ButtonCode.TRIANGLE}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btn1Img}
   position={[RIGHT_PAD[0], RIGHT_PAD[1] - BTN_PAD_GAP]}
 />
-<ControllerButton
-  code={ButtonCode.CIRCLE}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btn2Img}
   position={[RIGHT_PAD[0] + BTN_PAD_GAP, RIGHT_PAD[1]]}
 />
-<ControllerButton
-  code={ButtonCode.TIMES}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btn3Img}
   position={[RIGHT_PAD[0], RIGHT_PAD[1] + BTN_PAD_GAP]}
 />
-<ControllerButton
-  code={ButtonCode.SQUARE}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btn4Img}
   position={[RIGHT_PAD[0] - BTN_PAD_GAP, RIGHT_PAD[1]]}
 />
 
 <!-- Left pad -->
-<ControllerButton
-  code={ButtonCode.ARROW_UP}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={arrowUpImg}
   position={[LEFT_PAD[0], LEFT_PAD[1] - BTN_PAD_GAP]}
 />
-<ControllerButton
-  code={ButtonCode.ARROW_RIGHT}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={arrowRightImg}
   position={[LEFT_PAD[0] + BTN_PAD_GAP, LEFT_PAD[1]]}
 />
-<ControllerButton
-  code={ButtonCode.ARROW_DOWN}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={arrowDownImg}
   position={[LEFT_PAD[0], LEFT_PAD[1] + BTN_PAD_GAP]}
 />
-<ControllerButton
-  code={ButtonCode.ARROW_LEFT}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={arrowLeftImg}
   position={[LEFT_PAD[0] - BTN_PAD_GAP, LEFT_PAD[1]]}
 />
 
 <!-- Special button -->
-<ControllerButton
-  code={ButtonCode.TOP_LEFT}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btnTopLeftImg}
   position={[LEFT_PAD[0], LEFT_PAD[1] - 80]}
 />
-<ControllerButton
-  code={ButtonCode.TOP_RIGHT}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btnTopRightImg}
   position={[RIGHT_PAD[0], RIGHT_PAD[1] - 80]}
 />
-<ControllerButton
-  code={ButtonCode.MENU_LEFT}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btnMenuImg}
   position={[LEFT_PAD[0] + 66, LEFT_PAD[1] - 56]}
 />
-<ControllerButton
-  code={ButtonCode.MENU_RIGHT}
+<Button
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btnMenuImg}
   position={[RIGHT_PAD[0] - 66, RIGHT_PAD[1] - 56]}
 />
 
 <!-- Stick control -->
 <ControllerStick
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btnStickImg}
   position={[LEFT_PAD[0] + 79, LEFT_PAD[1] + 72]}
 />
 <ControllerStick
+  layer={AppLayer.CONTROLLER + 1}
   sprite={btnStickImg}
   position={[RIGHT_PAD[0] - 77, RIGHT_PAD[1] + 70]}
 />

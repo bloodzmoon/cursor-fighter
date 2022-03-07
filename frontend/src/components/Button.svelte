@@ -2,22 +2,24 @@
   import { onMount } from 'svelte'
   import * as PIXI from 'pixi.js'
 
-  import { appCtx } from 'core/context'
-  import type { ButtonCode } from 'core/buttonCode'
+  import { appCtx } from 'core/app'
+  import { AppLayer } from 'core/constant'
 
-  export let code: ButtonCode
   export let sprite: string
   export let position: number[]
+  export let rotation = 0
+  export let layer = AppLayer.CONTROLLER
+  export let onClick = () => {}
 
-  let isClicked = false
   let self: PIXI.Sprite
 
   onMount(() => {
     self = PIXI.Sprite.from(sprite)
-    self.zIndex = 2
+    self.zIndex = layer
     self.position.set(position[0], position[1])
     self.anchor.set(0.5)
     self.scale.set(0.5)
+    self.rotation = rotation
     self.interactive = true
     self.buttonMode = true
 
@@ -30,13 +32,11 @@
   })
 
   function handleMouseDown() {
-    isClicked = true
-    console.log('click', code)
     self.scale.set(0.45)
+    onClick()
   }
 
   function handleMouseUp() {
-    isClicked = false
     self.scale.set(0.5)
   }
 </script>

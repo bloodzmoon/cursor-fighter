@@ -3,7 +3,8 @@
   import * as PIXI from 'pixi.js'
   import vec2 from 'gl-vec2'
 
-  import { appCtx, AppSize } from '../core/context'
+  import { appCtx } from '../core/app'
+  import { AppSize } from 'core/constant'
   import cursor01 from '../assets/cursor01.png'
 
   let isClicked = false

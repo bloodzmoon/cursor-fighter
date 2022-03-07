@@ -3,12 +3,14 @@
   import * as PIXI from 'pixi.js'
   import vec2 from 'gl-vec2'
 
-  import { appCtx } from 'core/context'
+  import { appCtx } from 'core/app'
+  import { AppLayer } from 'core/constant'
 
   export let sprite: string
   export let position: number[]
+  export let layer = AppLayer.CONTROLLER
 
-  const DRAG_LIMIT = 23
+  const DRAG_RADIUS = 23
 
   let isDragging = false
   let self: PIXI.Sprite
@@ -16,7 +18,7 @@
 
   onMount(() => {
     self = PIXI.Sprite.from(sprite)
-    self.zIndex = 2
+    self.zIndex = layer
     self.position.set(position[0], position[1])
     self.anchor.set(0.5)
     self.scale.set(0.5)
@@ -45,12 +47,20 @@
   function handleDragMove() {
     if (!isDragging) return
 
-    const newPos = data.getLocalPosition($appCtx.stage)
-    const diff = vec2.sub([], [newPos.x, newPos.y], [position[0], position[1]])
+    const mousePos = data.global
+    const diff = vec2.sub([], [mousePos.x, mousePos.y], position)
     const diffLength = vec2.len(diff)
-    if (diffLength > DRAG_LIMIT) {
-      console.log('eiei')
+
+    if (diffLength > DRAG_RADIUS) {
+      const radians = Math.atan2(
+        mousePos.y - position[1],
+        mousePos.x - position[0]
+      )
+      const limitedX = Math.cos(radians) * DRAG_RADIUS + position[0]
+      const limitedY = Math.sin(radians) * DRAG_RADIUS + position[1]
+      self.position.set(limitedX, limitedY)
+    } else {
+      self.position.set(mousePos.x, mousePos.y)
     }
-    self.position.set(newPos.x, newPos.y)
   }
 </script>
