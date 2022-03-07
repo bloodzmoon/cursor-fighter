@@ -18,6 +18,8 @@
   import btnTopLeftImg from 'assets/btn_top_l.png'
   import btnTopRightImg from 'assets/btn_top_r.png'
   import btnMenuImg from 'assets/btn_sel.png'
+  import btnStickImg from 'assets/stick.png'
+  import ControllerStick from './ControllerStick.svelte'
 
   const RIGHT_PAD = [AppSize.WIDTH / 2 + 158, AppSize.HEIGHT + 12]
   const LEFT_PAD = [AppSize.WIDTH / 2 - 158, AppSize.HEIGHT + 12]
@@ -98,4 +100,14 @@
   code={ButtonCode.MENU_RIGHT}
   sprite={btnMenuImg}
   position={[RIGHT_PAD[0] - 66, RIGHT_PAD[1] - 56]}
+/>
+
+<!-- Stick control -->
+<ControllerStick
+  sprite={btnStickImg}
+  position={[LEFT_PAD[0] + 79, LEFT_PAD[1] + 72]}
+/>
+<ControllerStick
+  sprite={btnStickImg}
+  position={[RIGHT_PAD[0] - 77, RIGHT_PAD[1] + 70]}
 />

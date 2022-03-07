@@ -10,31 +10,33 @@
   export let position: number[]
 
   let isClicked = false
+  let self: PIXI.Sprite
 
   onMount(() => {
-    const btn = PIXI.Sprite.from(sprite)
-    btn.zIndex = 2
-    btn.position.set(position[0], position[1])
-    btn.anchor.set(0.5)
-    btn.scale.set(0.5)
-    btn.interactive = true
-    btn.buttonMode = true
+    self = PIXI.Sprite.from(sprite)
+    self.zIndex = 2
+    self.position.set(position[0], position[1])
+    self.anchor.set(0.5)
+    self.scale.set(0.5)
+    self.interactive = true
+    self.buttonMode = true
 
-    btn
-      .on('mousedown', () => {
-        console.log('click', code)
-        btn.scale.set(0.45)
-        isClicked = true
-      })
-      .on('mouseup', () => {
-        btn.scale.set(0.5)
-        isClicked = false
-      })
-      .on('mouseupoutside', () => {
-        btn.scale.set(0.5)
-        isClicked = false
-      })
+    self
+      .on('mousedown', handleMouseDown)
+      .on('mouseup', handleMouseUp)
+      .on('mouseupoutside', handleMouseUp)
 
-    $appCtx.stage.addChild(btn)
+    $appCtx.stage.addChild(self)
   })
+
+  function handleMouseDown() {
+    isClicked = true
+    console.log('click', code)
+    self.scale.set(0.45)
+  }
+
+  function handleMouseUp() {
+    isClicked = false
+    self.scale.set(0.5)
+  }
 </script>
