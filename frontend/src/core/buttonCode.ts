@@ -1,0 +1,17 @@
+export enum ButtonCode {
+  TRIANGLE,
+  CIRCLE,
+  TIMES,
+  SQUARE,
+
+  ARROW_UP,
+  ARROW_RIGHT,
+  ARROW_DOWN,
+  ARROW_LEFT,
+
+  TOP_LEFT,
+  TOP_RIGHT,
+
+  MENU_LEFT,
+  MENU_RIGHT,
+}

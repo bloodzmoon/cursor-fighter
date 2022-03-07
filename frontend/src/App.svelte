@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Canvas from './components/Canvas.svelte'
-  import ChatBox from './components/ChatBox.svelte'
-  import Player from './components/Player.svelte'
+  import Monitor from 'components/Monitor.svelte'
+  import Controller from 'components/Controller.svelte'
+  import Player from 'components/Player.svelte'
 </script>
 
-<Canvas />
-<ChatBox />
-<Player />
+<Monitor />
+<Controller />
+<!-- <Player /> -->

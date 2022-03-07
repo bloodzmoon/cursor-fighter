@@ -3,7 +3,7 @@
   import * as PIXI from 'pixi.js'
   import vec2 from 'gl-vec2'
 
-  import { appContext, AppSize } from '../core/context'
+  import { appCtx, AppSize } from '../core/context'
   import cursor01 from '../assets/cursor01.png'
 
   let isClicked = false
@@ -24,7 +24,7 @@
     player.x = AppSize.WIDTH / 2
     player.y = AppSize.HEIGHT / 2
     player.anchor.set(0.5, 0.5)
-    $appContext.stage.addChild(player)
+    $appCtx.stage.addChild(player)
 
     const playerName = new PIXI.Text('bloodzmmon', {
       fontSize: 11,
@@ -33,10 +33,10 @@
     playerName.anchor.set(0.5, 0.5)
     playerName.x = player.x
     playerName.y = player.y + 30
-    $appContext.stage.addChild(playerName)
+    $appCtx.stage.addChild(playerName)
 
     // player movement
-    $appContext.ticker.add(() => {
+    $appCtx.ticker.add(() => {
       if (isClicked) {
         const delta = vec2.sub([], [clickX, clickY], [player.x, player.y])
         const length = vec2.len(delta)
@@ -71,27 +71,27 @@
     })
 
     // player rotation
-    $appContext.ticker.add(() => {
+    $appCtx.ticker.add(() => {
       player.rotation += playerRotateSpeed * 0.98
     })
 
-    $appContext.stage.on('mousedown', (e: PIXI.InteractionEvent) => {
+    $appCtx.stage.on('mousedown', (e: PIXI.InteractionEvent) => {
       isClicked = true
 
       let pos = e.data.global
       clickX = pos.x
       clickY = pos.y
     })
-    $appContext.stage.on('mouseup', () => {
+    $appCtx.stage.on('mouseup', () => {
       isClicked = false
     })
-    $appContext.stage.on('mouseover', () => {
+    $appCtx.stage.on('mouseover', () => {
       isInScreen = true
     })
-    $appContext.stage.on('mouseout', () => {
+    $appCtx.stage.on('mouseout', () => {
       isInScreen = false
     })
-    $appContext.stage.on('pointermove', (e: PIXI.InteractionEvent) => {
+    $appCtx.stage.on('pointermove', (e: PIXI.InteractionEvent) => {
       let pos = e.data.global
       mX = pos.x
       mY = pos.y
@@ -104,7 +104,7 @@
 </script>
 
 <p>
-  FPS: {$appContext.ticker.FPS.toFixed(2)} isInScreen: {isInScreen} / isClick: {isClicked}
+  FPS: {$appCtx.ticker.FPS.toFixed(2)} isInScreen: {isInScreen} / isClick: {isClicked}
   / X: {mX} / Y: {mY}
 </p>
 

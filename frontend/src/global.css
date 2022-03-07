@@ -1,6 +1,8 @@
 :root {
     --light100: #ddd;
 
+    --blue600: #282c34;
+
     --dark100: #777;
     --dark400: #333;
     --dark500: #1a1a1a;
@@ -13,11 +15,9 @@
 body {
     margin: 0;
     padding: 0;
-    background: var(--dark500);
     user-select: none;
-}
+    overflow: hidden;
 
-#app {
     width: 100vw;
     height: 100vh;
     background-image: radial-gradient(var(--dark100) 5%, var(--dark500) 5%);
@@ -29,7 +29,6 @@ body {
     align-items: center;
 }
 
-canvas {
-    outline: 6px solid var(--dark400);
-    border-radius: 1rem;
+#app {
+    position: relative;
 }
