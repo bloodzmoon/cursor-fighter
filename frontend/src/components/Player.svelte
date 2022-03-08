@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { onMount, onDestroy } from 'svelte'
   import { clamp } from 'lodash'
   import { MotionBlurFilter } from '@pixi/filter-motion-blur'
   import * as PIXI from 'pixi.js'
@@ -27,6 +27,15 @@
   let friction = 0.02 // 0 - 1
   let velocity = [0, 0]
   let attacks = <IAttack[]>[]
+  let name = new PIXI.Text('', {
+    fontFamily: 'Pokemon',
+    fontSize: 20,
+    fill: 0xfafafa55,
+  })
+  let renderedObjects = <any[]>[]
+  let tickerFunctions = <any[]>[]
+
+  $: name.text = $gameCtx.me.name
 
   onMount(() => {
     self.zIndex = AppLayer.GAME_OBJECT
@@ -34,10 +43,19 @@
     self.y = AppSize.HEIGHT / 2
     self.anchor.set(0.5, 0.5)
     self.mask = $monitorCtx.mask
-
     $appCtx.stage.addChild(self)
+
+    name.zIndex = AppLayer.GAME_OBJECT + 1
+    name.anchor.set(0.5)
+    name.mask = $monitorCtx.mask
+    $appCtx.stage.addChild(name)
+
     $appCtx.ticker.add(handlePlayerMovement)
     $appCtx.ticker.add(handlePlayerAttack)
+  })
+
+  onDestroy(() => {
+    utils.cleanupAppObjects(tickerFunctions, renderedObjects)
   })
 
   function handlePlayerMovement() {
@@ -77,6 +95,8 @@
     velocity[1] *= 1 - friction
     self.x += velocity[0]
     self.y += velocity[1]
+    name.x = self.x
+    name.y = self.y + 28
     $gameCtx.me.position = [self.x, self.y]
   }
 

@@ -23,6 +23,7 @@
   let arenaIdRef: HTMLInputElement
   let arenaId = ''
   let renderedObjects = <any[]>[]
+  let tickerFunctions = <any[]>[]
 
   onMount(() => {
     const bg = new PIXI.Graphics()
@@ -42,14 +43,11 @@
     renderedObjects.push(btnYes)
 
     $appCtx.ticker.add(handleUI)
+    tickerFunctions.push(handleUI)
   })
 
   onDestroy(() => {
-    $appCtx.ticker.remove(handleUI)
-
-    for (const each of renderedObjects) {
-      $appCtx.stage.removeChild(each)
-    }
+    utils.cleanupAppObjects(tickerFunctions, renderedObjects)
   })
 
   function handleUI() {

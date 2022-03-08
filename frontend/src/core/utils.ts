@@ -3,6 +3,7 @@ import { get } from 'svelte/store'
 
 import type { ButtonCode } from 'core/constant'
 import { controllerCtx } from 'core/controller'
+import { appCtx } from 'core/app'
 
 type ValueOf<T> = T[keyof T]
 
@@ -27,9 +28,20 @@ function onButtonClick(buttonCode: ButtonCode, callback: () => void) {
   }
 }
 
+function cleanupAppObjects(tickerFunctions: any[], renderedObjects: any[]) {
+  const $appCtx = get(appCtx)
+  for (const each of tickerFunctions) {
+    $appCtx.ticker.remove(each)
+  }
+  for (const each of renderedObjects) {
+    $appCtx.stage.removeChild(each)
+  }
+}
+
 export default {
   radiansToVector,
   lastEnum,
   firstEnum,
   onButtonClick,
+  cleanupAppObjects,
 }

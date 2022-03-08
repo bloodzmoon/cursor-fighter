@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { onMount, onDestroy } from 'svelte'
   import { get } from 'lodash'
   import { MotionBlurFilter } from '@pixi/filter-motion-blur'
   import * as PIXI from 'pixi.js'
@@ -21,12 +21,19 @@
   import { Fighter, gameCtx } from 'core/game'
 
   export let fighterId: string
+  export let fighterName: string
 
   let self = PIXI.Sprite.from(cursor01)
-  let speed = 0.1
-  let friction = 0.02 // 0 - 1
-  let velocity = [0, 0]
   let attacks = <IAttack[]>[]
+  let name = new PIXI.Text(fighterName, {
+    fontFamily: 'Pokemon',
+    fontSize: 20,
+    fill: 0xfafafa55,
+  })
+  let renderedObjects = <any[]>[]
+  let tickerFunctions = <any[]>[]
+
+  $: name.text = fighterName
 
   onMount(() => {
     self.zIndex = AppLayer.GAME_OBJECT
@@ -34,11 +41,22 @@
     self.y = AppSize.HEIGHT / 2
     self.anchor.set(0.5, 0.5)
     self.mask = $monitorCtx.mask
-
     $appCtx.stage.addChild(self)
-    $appCtx.ticker.add(handlePlayerMovement)
+    renderedObjects.push(self)
 
+    name.zIndex = AppLayer.GAME_OBJECT + 1
+    name.anchor.set(0.5)
+    name.mask = $monitorCtx.mask
+    $appCtx.stage.addChild(name)
+    renderedObjects.push(name)
+
+    $appCtx.ticker.add(handlePlayerMovement)
+    tickerFunctions.push(handlePlayerMovement)
     //   $appCtx.ticker.add(handlePlayerAttack)
+  })
+
+  onDestroy(() => {
+    utils.cleanupAppObjects(tickerFunctions, renderedObjects)
   })
 
   function handlePlayerMovement() {
@@ -50,6 +68,8 @@
     // player movement
     self.x = fighter.position[0]
     self.y = fighter.position[1]
+    name.x = self.x
+    name.y = self.y + 28
   }
 
   function handlePlayerAttack() {
@@ -71,12 +91,6 @@
         velocity: bulletVelocity,
         object: bullet,
       })
-
-      // Bullet recoil
-      const recoil = vec2.negate([], bulletVelocity)
-      vec2.scale(recoil, recoil, 0.01)
-      velocity[0] += recoil[0]
-      velocity[1] += recoil[1]
     })
 
     // Attack object movement

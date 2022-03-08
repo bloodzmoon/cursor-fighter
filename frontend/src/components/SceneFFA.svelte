@@ -12,8 +12,6 @@
   import Player from './Player.svelte'
   import OtherPlayer from './OtherPlayer.svelte'
 
-  //   $: console.log('>>', $gameCtx.fighters)
-
   onMount(() => {
     connectToArena()
 
@@ -57,5 +55,5 @@
 
 <Player />
 {#each Object.values($gameCtx.fighters) as fighter}
-  <OtherPlayer fighterId={fighter.id} />
+  <OtherPlayer fighterId={fighter.id} fighterName={fighter.name} />
 {/each}
