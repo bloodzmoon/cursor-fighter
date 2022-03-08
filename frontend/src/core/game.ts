@@ -4,6 +4,9 @@ export const gameCtx = writable(createGame())
 
 function createGame() {
   return {
+    isSpriteLoaded: false,
+    isAudioLoaded: false,
+    isFontLoaded: false,
     arenaId: '',
     me: <FighterWithWebSocket>{},
     fighters: <Record<string, Fighter>>{},

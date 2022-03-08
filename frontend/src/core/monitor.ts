@@ -11,7 +11,7 @@ function createMonitor() {
 
   return {
     isActive: true,
-    stage: MonitorStage.CREATE_FIGHTER,
+    stage: MonitorStage.INIT,
     mask,
   }
 }

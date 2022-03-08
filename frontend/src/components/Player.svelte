@@ -15,12 +15,12 @@
   } from 'core/constant'
   import { controllerCtx } from 'core/controller'
   import { monitorCtx } from 'core/monitor'
-  import utils from 'core/utils'
-
-  import cursor01 from 'assets/cursor01.png'
-  import bulletImg from 'assets/bullet.png'
   import { gameCtx } from 'core/game'
   import { GameEvent, MessageObject } from 'core/event'
+  import utils from 'core/utils'
+
+  import cursor01 from 'assets/img/cursor01.png'
+  import bulletImg from 'assets/img/bullet.png'
 
   let self = PIXI.Sprite.from(cursor01)
   let speed = 0.1

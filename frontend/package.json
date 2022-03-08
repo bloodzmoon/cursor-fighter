@@ -13,6 +13,7 @@
     "@sveltejs/vite-plugin-svelte": "1.0.0-next.30",
     "@tsconfig/svelte": "2.0.1",
     "@types/gl-vec2": "1.3.2",
+    "@types/howler": "2.2.5",
     "@types/lodash": "4.14.179",
     "@types/webfontloader": "1.6.34",
     "svelte": "3.44.0",
@@ -26,9 +27,10 @@
   "dependencies": {
     "@pixi/filter-motion-blur": "4.1.5",
     "@pixi/filter-outline": "4.1.5",
+    "@pixi/sound": "4.2.0",
     "gl-vec2": "1.3.0",
     "lodash": "4.17.21",
-    "nanoid": "^3.3.1",
+    "nanoid": "3.3.1",
     "pixi.js": "6.2.2",
     "webfontloader": "1.6.28"
   }

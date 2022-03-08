@@ -14,11 +14,11 @@
     IAttack,
   } from 'core/constant'
   import { monitorCtx } from 'core/monitor'
+  import { Fighter, gameCtx } from 'core/game'
   import utils from 'core/utils'
 
-  import cursor01 from 'assets/cursor01.png'
-  import bulletImg from 'assets/bullet.png'
-  import { Fighter, gameCtx } from 'core/game'
+  import cursor01 from 'assets/img/cursor01.png'
+  import bulletImg from 'assets/img/bullet.png'
 
   export let fighterId: string
   export let fighterName: string

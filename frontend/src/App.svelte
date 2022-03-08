@@ -7,8 +7,11 @@
   import Monitor from 'components/Monitor.svelte'
   import Controller from 'components/Controller.svelte'
   import { gameCtx } from 'core/game'
+  import { loadAssests } from 'core/app'
 
   onMount(() => {
+    loadAssests()
+
     const fighterId = localStorage.getItem(FIGHTER_ID)
     if (fighterId) {
       $gameCtx.me.id = fighterId
@@ -21,5 +24,7 @@
   })
 </script>
 
-<Monitor />
-<Controller />
+{#if $gameCtx.isSpriteLoaded && $gameCtx.isFontLoaded}
+  <Monitor />
+  <Controller />
+{/if}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { sound } from '@pixi/sound'
   import * as PIXI from 'pixi.js'
   import vec2 from 'gl-vec2'
 
@@ -19,7 +20,7 @@
   let mousePos: PIXI.Point
 
   onMount(() => {
-    self = PIXI.Sprite.from(sprite)
+    self = PIXI.Sprite.from($appCtx.loader.resources[sprite].texture)
     self.zIndex = layer
     self.position.set(position[0], position[1])
     self.anchor.set(0.5)
@@ -39,11 +40,13 @@
   function handleDragStart(e: PIXI.InteractionEvent) {
     isDragging = true
     mousePos = e.data.global
+    sound.play('controllerTapFX', { volume: 0.3 })
   }
 
   function handleDragEnd() {
     isDragging = false
     self.position.set(position[0], position[1])
+    sound.play('controllerTapFX', { volume: 0.3 })
 
     // Update controller context
     if (code === ButtonCode.ANALOG_LEFT) {

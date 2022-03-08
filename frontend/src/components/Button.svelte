@@ -3,7 +3,7 @@
   import * as PIXI from 'pixi.js'
 
   import { appCtx } from 'core/app'
-  import { AppLayer, ButtonCode } from 'core/constant'
+  import { AppLayer } from 'core/constant'
 
   export let sprite: string
   export let position: number[]
@@ -14,7 +14,7 @@
   let self: PIXI.Sprite
 
   onMount(() => {
-    self = PIXI.Sprite.from(sprite)
+    self = PIXI.Sprite.from($appCtx.loader.resources[sprite].texture)
     self.zIndex = layer
     self.position.set(position[0], position[1])
     self.anchor.set(0.5)

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { clamp } from 'lodash'
+  import { sound } from '@pixi/sound'
   import * as PIXI from 'pixi.js'
 
   import { AppLayer, AppSize, ButtonCode, MonitorStage } from 'core/constant'
@@ -9,8 +10,6 @@
   import { controllerCtx } from 'core/controller'
   import { gameCtx } from 'core/game'
   import utils from 'core/utils'
-
-  import btn2Img from 'assets/btn2.png'
 
   enum Focus {
     FIGHTER_NAME,
@@ -34,7 +33,7 @@
     $appCtx.stage.addChild(bg)
     renderedObjects.push(bg)
 
-    const btnYes = PIXI.Sprite.from(btn2Img)
+    const btnYes = PIXI.Sprite.from($appCtx.loader.resources['btn2'].texture)
     btnYes.zIndex = AppLayer.GAME_OBJECT
     btnYes.scale.set(0.45)
     btnYes.anchor.set(0.5)
@@ -53,6 +52,7 @@
   function handleUI() {
     // Handle focus
     utils.onButtonClick(ButtonCode.ARROW_UP, () => {
+      sound.play('uiSelectFX')
       currentFocus = clamp(
         currentFocus - 1,
         utils.firstEnum(Focus),
@@ -60,6 +60,7 @@
       )
     })
     utils.onButtonClick(ButtonCode.ARROW_DOWN, () => {
+      sound.play('uiSelectFX')
       currentFocus = clamp(
         currentFocus + 1,
         utils.firstEnum(Focus),

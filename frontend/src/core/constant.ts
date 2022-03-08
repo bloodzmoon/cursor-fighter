@@ -38,6 +38,7 @@ export enum ButtonCode {
 }
 
 export enum MonitorStage {
+  INIT,
   CREATE_FIGHTER,
   ROOM_LIST,
   LOBBY,

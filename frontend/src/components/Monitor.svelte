@@ -5,22 +5,39 @@
   import { appCtx } from 'core/app'
   import { monitorCtx } from 'core/monitor'
   import { AppLayer, AppSize, MonitorStage } from 'core/constant'
-  import btnImg from 'assets/btn_sel.png'
-  import blackImg from 'assets/black.png'
 
   import Button from './Button.svelte'
   import SceneCreateFighter from './SceneCreateFighter.svelte'
   import SceneFFA from './SceneFFA.svelte'
+  import { gameCtx } from 'core/game'
+  import { controllerCtx } from 'core/controller'
+
+  let blackScreen = PIXI.Sprite.from(
+    $appCtx.loader.resources['blackMonitor'].texture
+  )
 
   $: renderBlackScreen($monitorCtx.isActive)
-  let blackScreen = PIXI.Sprite.from(blackImg)
 
   onMount(() => {
     const appContainer = document.getElementById('app')
     appContainer.prepend($appCtx.view)
 
     blackScreen.zIndex = AppLayer.OVERLAY
+
+    $appCtx.ticker.add(checkLoadingProcess)
   })
+
+  function checkLoadingProcess() {
+    if (
+      $gameCtx.isAudioLoaded &&
+      $gameCtx.isFontLoaded &&
+      $gameCtx.isSpriteLoaded
+    ) {
+      $controllerCtx.isLoading = false
+      $monitorCtx.stage = MonitorStage.CREATE_FIGHTER
+      $appCtx.ticker.remove(checkLoadingProcess)
+    }
+  }
 
   function renderBlackScreen(isActive: boolean) {
     if (!isActive) {
@@ -40,7 +57,7 @@
   style="width: {AppSize.WIDTH}px; height: {AppSize.HEIGHT}px;"
 />
 <Button
-  sprite={btnImg}
+  sprite="btnMenu"
   position={[AppSize.WIDTH - 20, AppSize.HEIGHT + 8]}
   rotation={(90 * Math.PI) / 180}
   onClick={turnScreenOnOff}
