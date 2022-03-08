@@ -12,6 +12,8 @@ export enum AppLayer {
   CONTROLLER = 30,
 }
 
+export const FIGHTER_ID = 'FIGHTER_ID_KEY'
+
 export enum ButtonCode {
   TRIANGLE,
   CIRCLE,

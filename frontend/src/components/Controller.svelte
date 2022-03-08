@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import WebFont from 'webfontloader'
   import * as PIXI from 'pixi.js'
 
   import { appCtx } from 'core/app'
@@ -26,18 +27,58 @@
   const LEFT_PAD = [AppSize.WIDTH / 2 - 158, AppSize.HEIGHT + 12]
   const BTN_PAD_GAP = 32
 
+  let loadingIcon = new PIXI.Text('{}', {
+    fontFamily: 'Pokemon',
+    fontSize: 28,
+    fill: 0xffffff,
+  })
+  let loadingText = new PIXI.Text('Loading', {
+    fontFamily: 'Pokemon',
+    fontSize: 20,
+    fill: 0xffffff,
+  })
+
   onMount(() => {
     const controller = PIXI.Sprite.from(controllerImg)
     controller.position.set(AppSize.WIDTH / 2, AppSize.HEIGHT)
     controller.anchor.set(0.5, 0.25)
     controller.scale.set(0.5)
     controller.zIndex = AppLayer.CONTROLLER
-
     $appCtx.stage.addChild(controller)
+
+    WebFont.load({
+      custom: {
+        families: ['Pokemon'],
+      },
+      active: () => {
+        loadingIcon.zIndex = AppLayer.CONTROLLER + 1
+        loadingIcon.anchor.set(0.5)
+        loadingIcon.position.set(AppSize.WIDTH / 2, AppSize.HEIGHT - 30)
+        $appCtx.stage.addChild(loadingIcon)
+
+        loadingText.zIndex = AppLayer.CONTROLLER + 1
+        loadingText.anchor.set(0.5)
+        loadingText.position.set(AppSize.WIDTH / 2, AppSize.HEIGHT)
+        $appCtx.stage.addChild(loadingText)
+      },
+    })
+
+    $appCtx.ticker.add(handleLoadingIcon)
   })
 
   function handleButtonClick(code: ButtonCode) {
     $controllerCtx[code] = true
+  }
+
+  function handleLoadingIcon(dt: number) {
+    if ($controllerCtx.isLoading) {
+      loadingIcon.rotation += 0.1 * dt
+      loadingIcon.alpha = 1
+      loadingText.alpha = 1
+    } else {
+      loadingIcon.alpha = 0
+      loadingText.alpha = 0
+    }
   }
 </script>
 
@@ -46,16 +87,19 @@
   layer={AppLayer.CONTROLLER + 1}
   sprite={btn1Img}
   position={[RIGHT_PAD[0], RIGHT_PAD[1] - BTN_PAD_GAP]}
+  onClick={() => handleButtonClick(ButtonCode.TRIANGLE)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
   sprite={btn2Img}
   position={[RIGHT_PAD[0] + BTN_PAD_GAP, RIGHT_PAD[1]]}
+  onClick={() => handleButtonClick(ButtonCode.CIRCLE)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
   sprite={btn3Img}
   position={[RIGHT_PAD[0], RIGHT_PAD[1] + BTN_PAD_GAP]}
+  onClick={() => handleButtonClick(ButtonCode.TIMES)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
@@ -69,21 +113,25 @@
   layer={AppLayer.CONTROLLER + 1}
   sprite={arrowUpImg}
   position={[LEFT_PAD[0], LEFT_PAD[1] - BTN_PAD_GAP]}
+  onClick={() => handleButtonClick(ButtonCode.ARROW_UP)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
   sprite={arrowRightImg}
   position={[LEFT_PAD[0] + BTN_PAD_GAP, LEFT_PAD[1]]}
+  onClick={() => handleButtonClick(ButtonCode.ARROW_RIGHT)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
   sprite={arrowDownImg}
   position={[LEFT_PAD[0], LEFT_PAD[1] + BTN_PAD_GAP]}
+  onClick={() => handleButtonClick(ButtonCode.ARROW_DOWN)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
   sprite={arrowLeftImg}
   position={[LEFT_PAD[0] - BTN_PAD_GAP, LEFT_PAD[1]]}
+  onClick={() => handleButtonClick(ButtonCode.ARROW_LEFT)}
 />
 
 <!-- Special button -->
@@ -91,21 +139,25 @@
   layer={AppLayer.CONTROLLER + 1}
   sprite={btnTopLeftImg}
   position={[LEFT_PAD[0], LEFT_PAD[1] - 80]}
+  onClick={() => handleButtonClick(ButtonCode.TOP_LEFT)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
   sprite={btnTopRightImg}
   position={[RIGHT_PAD[0], RIGHT_PAD[1] - 80]}
+  onClick={() => handleButtonClick(ButtonCode.TOP_RIGHT)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
   sprite={btnMenuImg}
   position={[LEFT_PAD[0] + 66, LEFT_PAD[1] - 56]}
+  onClick={() => handleButtonClick(ButtonCode.MENU_LEFT)}
 />
 <Button
   layer={AppLayer.CONTROLLER + 1}
   sprite={btnMenuImg}
   position={[RIGHT_PAD[0] - 66, RIGHT_PAD[1] - 56]}
+  onClick={() => handleButtonClick(ButtonCode.MENU_RIGHT)}
 />
 
 <!-- Stick control -->

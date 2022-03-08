@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { clamp } from 'lodash'
+  import { get } from 'lodash'
   import { MotionBlurFilter } from '@pixi/filter-motion-blur'
   import * as PIXI from 'pixi.js'
   import vec2 from 'gl-vec2'
@@ -13,14 +13,14 @@
     ButtonCode,
     IAttack,
   } from 'core/constant'
-  import { controllerCtx } from 'core/controller'
   import { monitorCtx } from 'core/monitor'
   import utils from 'core/utils'
 
   import cursor01 from 'assets/cursor01.png'
   import bulletImg from 'assets/bullet.png'
-  import { gameCtx } from 'core/game'
-  import { GameEvent, MessageObject } from 'core/event'
+  import { Fighter, gameCtx } from 'core/game'
+
+  export let fighterId: string
 
   let self = PIXI.Sprite.from(cursor01)
   let speed = 0.1
@@ -37,47 +37,19 @@
 
     $appCtx.stage.addChild(self)
     $appCtx.ticker.add(handlePlayerMovement)
-    $appCtx.ticker.add(handlePlayerAttack)
+
+    //   $appCtx.ticker.add(handlePlayerAttack)
   })
 
   function handlePlayerMovement() {
-    // sync via socket
-    if ($gameCtx.me._socket.readyState === WebSocket.OPEN) {
-      const { _socket, ...fighter } = $gameCtx.me
-      const msg: MessageObject = {
-        event: GameEvent.SYNC_ME,
-        payload: {
-          ...fighter,
-          arenaId: $gameCtx.arenaId,
-        },
-      }
-      $gameCtx.me._socket.send(JSON.stringify(msg))
-    }
+    const fighter = get($gameCtx.fighters, fighterId, <Fighter>{})
 
     // player rotation
-    self.rotation = $controllerCtx[ButtonCode.ANALOG_RIGHT]
-    $gameCtx.me.rotation = self.rotation
+    self.rotation = fighter.rotation
 
     // player movement
-    const analogPos = $controllerCtx[ButtonCode.ANALOG_LEFT]
-    const controlPos = vec2.add([], analogPos, [self.x, self.y])
-    const delta = vec2.sub([], controlPos, [self.x, self.y])
-    vec2.normalize(delta, delta)
-    vec2.scaleAndAdd(velocity, velocity, delta, speed)
-
-    if (self.x < 0 || self.x > AppSize.WIDTH) {
-      self.x = clamp(self.x, 0, AppSize.WIDTH)
-      velocity[0] *= -1
-    }
-    if (self.y < 0 || self.y > AppSize.HEIGHT) {
-      self.y = clamp(self.y, 0, AppSize.HEIGHT)
-      velocity[1] *= -1
-    }
-    velocity[0] *= 1 - friction
-    velocity[1] *= 1 - friction
-    self.x += velocity[0]
-    self.y += velocity[1]
-    $gameCtx.me.position = [self.x, self.y]
+    self.x = fighter.position[0]
+    self.y = fighter.position[1]
   }
 
   function handlePlayerAttack() {

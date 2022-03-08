@@ -10,7 +10,6 @@ function createApp() {
     backgroundAlpha: 0,
   })
 
-  app.stage.interactive = true
   app.stage.sortableChildren = true
   return app
 }

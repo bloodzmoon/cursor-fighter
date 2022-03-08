@@ -1,11 +1,17 @@
 :root {
     --light100: #ddd;
 
+    --blue400: #3283dc;
     --blue600: #282c34;
 
     --dark100: #777;
     --dark400: #333;
     --dark500: #1a1a1a;
+}
+
+@font-face {
+    font-family: 'Pokemon';
+    src: url('./assets/fonts/pokemon-ds-font.ttf');
 }
 
 * {
@@ -27,6 +33,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    font-family: 'Pokemon';
 }
 
 #app {

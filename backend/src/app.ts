@@ -1,22 +1,21 @@
 import WebSocket from 'ws'
 
 import { PORT } from './constants/common'
+import game from './core/game'
 
 const app = new WebSocket.Server({
   port: PORT,
 })
 
 app.on('connection', (socket) => {
-  console.log('Some one has joined the game!')
-  socket.send('Hello')
+  game.onFighterJoin(socket)
 
   socket.on('message', (message) => {
-    socket.send(`Your msg: ${message.toString()}`)
+    game.onGameEvent(socket, app, message.toString())
   })
 
   socket.on('close', () => {
-    console.log('Some one has left the game ._.')
-    socket.send('Bye!')
+    game.onFighterLeft(socket)
   })
 })
 
