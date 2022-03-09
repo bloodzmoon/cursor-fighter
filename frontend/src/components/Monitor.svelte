@@ -1,81 +1,90 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { sound } from '@pixi/sound'
   import * as PIXI from 'pixi.js'
 
-  import { appCtx } from 'core/app'
-  import { monitorCtx } from 'core/monitor'
-  import { AppLayer, AppSize, MonitorStage } from 'core/constant'
-
-  import Button from './Button.svelte'
-  import SceneCreateFighter from './SceneCreateFighter.svelte'
-  import SceneFFA from './SceneFFA.svelte'
+  import {
+    GameScreen,
+    GameScene,
+    GameLayer,
+    GameIMG,
+    GameFX,
+  } from 'core/constant'
   import { gameCtx } from 'core/game'
-  import { controllerCtx } from 'core/controller'
 
-  let blackScreen = PIXI.Sprite.from(
-    $appCtx.loader.resources['blackMonitor'].texture
-  )
+  import Button from 'components/Button.svelte'
+  import SceneInit from 'scenes/Init.svelte'
+  import SceneCreation from 'scenes/Creation.svelte'
+  import SceneDeathMatch from 'scenes/DeathMatch.svelte'
 
-  $: renderBlackScreen($monitorCtx.isActive)
+  let blackScreen: PIXI.Sprite
 
   onMount(() => {
-    const appContainer = document.getElementById('app')
-    appContainer.prepend($appCtx.view)
+    const html = document.getElementById('app')
+    html.append($gameCtx.app.view)
 
-    blackScreen.zIndex = AppLayer.OVERLAY
-
-    $appCtx.ticker.add(checkLoadingProcess)
+    blackScreen = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.MONITOR_OFF].texture
+    )
+    blackScreen.zIndex = GameLayer.MONITOR + 1
+    $gameCtx.app.stage.addChild(blackScreen)
+    $gameCtx.app.ticker.add(handleBlackScreen)
   })
 
-  function checkLoadingProcess() {
-    if (
-      $gameCtx.isAudioLoaded &&
-      $gameCtx.isFontLoaded &&
-      $gameCtx.isSpriteLoaded
-    ) {
-      $controllerCtx.isLoading = false
-      $monitorCtx.stage = MonitorStage.CREATE_FIGHTER
-      $appCtx.ticker.remove(checkLoadingProcess)
-    }
-  }
-
-  function renderBlackScreen(isActive: boolean) {
-    if (!isActive) {
-      $appCtx.stage.addChild(blackScreen)
-    } else {
-      $appCtx.stage.removeChild(blackScreen)
-    }
+  function handleBlackScreen() {
+    blackScreen.visible = !$gameCtx.isMonitorActive
   }
 
   function turnScreenOnOff() {
-    $monitorCtx.isActive = !$monitorCtx.isActive
+    $gameCtx.isMonitorActive = !$gameCtx.isMonitorActive
+    sound.play(GameFX.MONITOR_POWER, { volume: 0.2 })
   }
 </script>
 
 <div
   class="monitor"
-  style="width: {AppSize.WIDTH}px; height: {AppSize.HEIGHT}px;"
+  style="width: {GameScreen.WIDTH}px; height: {GameScreen.HEIGHT}px;"
+/>
+<div
+  class="monitor-power"
+  class:active={$gameCtx.isMonitorActive}
+  style="left: {GameScreen.WIDTH - 10}px; top: {GameScreen.HEIGHT + 4}px"
 />
 <Button
-  sprite="btnMenu"
-  position={[AppSize.WIDTH - 20, AppSize.HEIGHT + 8]}
-  rotation={(90 * Math.PI) / 180}
+  sprite={GameIMG.BTN_MENU}
+  position={[GameScreen.WIDTH - 24, GameScreen.HEIGHT + 8]}
+  angle={90}
   onClick={turnScreenOnOff}
 />
-{#if $monitorCtx.stage === MonitorStage.CREATE_FIGHTER}
-  <SceneCreateFighter />
-{:else if $monitorCtx.stage === MonitorStage.PLAYING_FFA}
-  <SceneFFA />
+{#if $gameCtx.scene === GameScene.INIT}
+  <SceneInit />
+{:else if $gameCtx.scene === GameScene.UI_CREATION}
+  <SceneCreation />
+{:else if $gameCtx.scene === GameScene.PLAY_DEATH_MATCH}
+  <SceneDeathMatch />
 {/if}
 
 <style>
   .monitor {
     position: absolute;
-    z-index: -1;
+    z-index: -2;
     top: 0;
     left: 0;
 
     outline: 16px solid var(--blue600);
     background: black;
+  }
+
+  .monitor-power {
+    position: absolute;
+    z-index: -1;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: crimson;
+  }
+
+  .monitor-power.active {
+    background: greenyellow;
   }
 </style>

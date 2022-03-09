@@ -2,24 +2,25 @@
   import { onMount } from 'svelte'
   import * as PIXI from 'pixi.js'
 
-  import { appCtx } from 'core/app'
-  import { AppLayer } from 'core/constant'
+  import { gameCtx } from 'core/game'
+  import { GameIMG, GameLayer } from 'core/constant'
 
-  export let sprite: string
+  export let sprite: GameIMG
   export let position: number[]
-  export let rotation = 0
-  export let layer = AppLayer.CONTROLLER
+  export let container = $gameCtx.app.stage
+  export let angle = 0
+  export let layer = GameLayer.CONTROLLER
   export let onClick = () => {}
 
   let self: PIXI.Sprite
 
   onMount(() => {
-    self = PIXI.Sprite.from($appCtx.loader.resources[sprite].texture)
+    self = PIXI.Sprite.from($gameCtx.app.loader.resources[sprite].texture)
     self.zIndex = layer
     self.position.set(position[0], position[1])
     self.anchor.set(0.5)
     self.scale.set(0.5)
-    self.rotation = rotation
+    self.angle = angle
     self.interactive = true
     self.buttonMode = true
 
@@ -28,7 +29,7 @@
       .on('mouseup', handleMouseUp)
       .on('mouseupoutside', handleMouseUp)
 
-    $appCtx.stage.addChild(self)
+    container.addChild(self)
   })
 
   function handleMouseDown() {

@@ -4,14 +4,12 @@
   import * as PIXI from 'pixi.js'
   import vec2 from 'gl-vec2'
 
-  import { appCtx } from 'core/app'
-  import { AppLayer, ButtonCode } from 'core/constant'
+  import { gameCtx } from 'core/game'
+  import { GameLayer, ButtonCode, GameIMG, GameFX } from 'core/constant'
   import { controllerCtx } from 'core/controller'
 
   export let code: ButtonCode
-  export let sprite: string
   export let position: number[]
-  export let layer = AppLayer.CONTROLLER
 
   const DRAG_RADIUS = 23
 
@@ -20,8 +18,10 @@
   let mousePos: PIXI.Point
 
   onMount(() => {
-    self = PIXI.Sprite.from($appCtx.loader.resources[sprite].texture)
-    self.zIndex = layer
+    self = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.BTN_STICK].texture
+    )
+    self.zIndex = GameLayer.CONTROLLER + 1
     self.position.set(position[0], position[1])
     self.anchor.set(0.5)
     self.scale.set(0.5)
@@ -34,19 +34,17 @@
       .on('mouseupoutside', handleDragEnd)
       .on('mousemove', handleDragMove)
 
-    $appCtx.stage.addChild(self)
+    $gameCtx.controller.addChild(self)
   })
 
   function handleDragStart(e: PIXI.InteractionEvent) {
     isDragging = true
-    mousePos = e.data.global
-    sound.play('controllerTapFX', { volume: 0.3 })
   }
 
   function handleDragEnd() {
     isDragging = false
     self.position.set(position[0], position[1])
-    sound.play('controllerTapFX', { volume: 0.3 })
+    sound.play(GameFX.CONTROLLER_TAP)
 
     // Update controller context
     if (code === ButtonCode.ANALOG_LEFT) {
@@ -54,8 +52,9 @@
     }
   }
 
-  function handleDragMove() {
+  function handleDragMove(e: PIXI.InteractionEvent) {
     if (!isDragging) return
+    mousePos = e.data.getLocalPosition($gameCtx.controller)
 
     const diff = vec2.sub([], [mousePos.x, mousePos.y], position)
     const diffLength = vec2.len(diff)

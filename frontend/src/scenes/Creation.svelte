@@ -4,10 +4,14 @@
   import { sound } from '@pixi/sound'
   import * as PIXI from 'pixi.js'
 
-  import { AppLayer, AppSize, ButtonCode, MonitorStage } from 'core/constant'
-  import { appCtx } from 'core/app'
-  import { monitorCtx } from 'core/monitor'
-  import { controllerCtx } from 'core/controller'
+  import {
+    GameLayer,
+    GameScreen,
+    GameScene,
+    ButtonCode,
+    GameIMG,
+    GameFX,
+  } from 'core/constant'
   import { gameCtx } from 'core/game'
   import utils from 'core/utils'
 
@@ -21,38 +25,36 @@
   let fighterName = ''
   let arenaIdRef: HTMLInputElement
   let arenaId = ''
-  let renderedObjects = <any[]>[]
-  let tickerFunctions = <any[]>[]
 
   onMount(() => {
     const bg = new PIXI.Graphics()
-    bg.zIndex = AppLayer.BACKGROUND
+    bg.zIndex = GameLayer.BACKGROUND
     bg.beginFill(0x21252b)
-      .drawRect(0, 0, AppSize.WIDTH, AppSize.HEIGHT)
+      .drawRect(0, 0, GameScreen.WIDTH, GameScreen.HEIGHT)
       .endFill()
-    $appCtx.stage.addChild(bg)
-    renderedObjects.push(bg)
+    $gameCtx.monitor.addChild(bg)
 
-    const btnYes = PIXI.Sprite.from($appCtx.loader.resources['btn2'].texture)
-    btnYes.zIndex = AppLayer.GAME_OBJECT
+    const btnYes = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.BTN_2].texture
+    )
+    btnYes.zIndex = GameLayer.GAME_OBJECT
     btnYes.scale.set(0.45)
     btnYes.anchor.set(0.5)
-    btnYes.position.set(AppSize.WIDTH / 2 - 90, 400)
-    $appCtx.stage.addChild(btnYes)
-    renderedObjects.push(btnYes)
+    btnYes.position.set(GameScreen.WIDTH / 2 - 90, 400)
+    $gameCtx.monitor.addChild(btnYes)
 
-    $appCtx.ticker.add(handleUI)
-    tickerFunctions.push(handleUI)
+    $gameCtx.app.ticker.add(handleScene)
   })
 
   onDestroy(() => {
-    utils.cleanupAppObjects(tickerFunctions, renderedObjects)
+    $gameCtx.app.ticker.remove(handleScene)
+    $gameCtx.monitor.removeChildren()
   })
 
-  function handleUI() {
+  function handleScene() {
     // Handle focus
     utils.onButtonClick(ButtonCode.ARROW_UP, () => {
-      sound.play('uiSelectFX')
+      sound.play(GameFX.UI_SELECT, { volume: 0.5 })
       currentFocus = clamp(
         currentFocus - 1,
         utils.firstEnum(Focus),
@@ -60,7 +62,7 @@
       )
     })
     utils.onButtonClick(ButtonCode.ARROW_DOWN, () => {
-      sound.play('uiSelectFX')
+      sound.play(GameFX.UI_SELECT, { volume: 0.5 })
       currentFocus = clamp(
         currentFocus + 1,
         utils.firstEnum(Focus),
@@ -78,8 +80,8 @@
       }
 
       // Go to next scene
-      $controllerCtx.isLoading = true
-      $monitorCtx.stage = MonitorStage.PLAYING_FFA
+      $gameCtx.isControllerLoading = true
+      $gameCtx.scene = GameScene.PLAY_DEATH_MATCH
       $gameCtx.arenaId = arenaId
       $gameCtx.me = {
         ...$gameCtx.me,
@@ -97,7 +99,7 @@
   }
 </script>
 
-{#if $monitorCtx.isActive}
+{#if $gameCtx.isMonitorActive}
   <span class="label fighter-name">[ Fighter Name ]</span>
   <input
     bind:this={fighterNameRef}

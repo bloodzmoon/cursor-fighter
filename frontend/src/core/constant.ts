@@ -1,14 +1,18 @@
 import type * as PIXI from 'pixi.js'
 
-export enum AppSize {
+export enum GameScreen {
   WIDTH = 1000,
   HEIGHT = 560,
 }
 
-export enum AppLayer {
+export enum GameLayer {
+  // In-game
   BACKGROUND = 1,
   GAME_OBJECT = 5,
-  OVERLAY = 20,
+  GAME_UI = 10,
+
+  // Outside
+  MONITOR = 20,
   CONTROLLER = 30,
 }
 
@@ -37,12 +41,37 @@ export enum ButtonCode {
   MONITOR_POWER,
 }
 
-export enum MonitorStage {
+export enum GameScene {
   INIT,
-  CREATE_FIGHTER,
-  ROOM_LIST,
-  LOBBY,
-  PLAYING_FFA,
+  UI_CREATION,
+  PLAY_DEATH_MATCH,
+}
+
+export enum GameIMG {
+  CONTROLLER = 'IMG_CONTROLLER',
+  BTN_1 = 'IMG_BTN_1',
+  BTN_2 = 'IMG_BTN_2',
+  BTN_3 = 'IMG_BTN_3',
+  BTN_4 = 'IMG_BTN_4',
+  BTN_UP = 'IMG_BTN_UP',
+  BTN_RIGHT = 'IMG_BTN_RIGHT',
+  BTN_DOWN = 'IMG_BTN_DOWN',
+  BTN_LEFT = 'IMG_BTN_LEFT',
+  BTN_TL = 'IMG_BTN_TL',
+  BTN_TR = 'IMG_BTN_TR',
+  BTN_MENU = 'IMG_BTN_MENU',
+  BTN_STICK = 'IMG_BTN_STICK',
+  MONITOR_OFF = 'IMG_MONITOR_OFF',
+
+  CURSOR_1 = 'IMG_CURSOR_1',
+  ATK_PISTOL = 'IMG_ATK_PISTOL',
+}
+
+export enum GameFX {
+  UI_SELECT = 'FX_UI_SELECT',
+  CONTROLLER_TAP = 'FX_CONTROLLER_TAP',
+  MONITOR_POWER = 'FX_MONITOR_POWER',
+  ATK_PISTOL = 'FX_ATK_PISTOL',
 }
 
 export enum AttackType {
@@ -54,3 +83,12 @@ export type IAttack = {
   velocity: number[]
   object: PIXI.Sprite
 }
+
+export type Fighter = {
+  id: string
+  name: string
+  rotation: number
+  position: number[]
+}
+
+export type FighterWithWebSocket = Fighter & { _socket?: WebSocket }

@@ -1,4 +1,4 @@
-import type { Fighter } from 'core/game'
+import type { Fighter } from 'core/constant'
 
 export enum GameEvent {
   FIRST_JOIN,

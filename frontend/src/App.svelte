@@ -3,11 +3,10 @@
   import { nanoid } from 'nanoid'
 
   import { FIGHTER_ID } from 'core/constant'
+  import { gameCtx, loadAssests } from 'core/game'
 
   import Monitor from 'components/Monitor.svelte'
   import Controller from 'components/Controller.svelte'
-  import { gameCtx } from 'core/game'
-  import { loadAssests } from 'core/app'
 
   onMount(() => {
     loadAssests()
@@ -24,7 +23,26 @@
   })
 </script>
 
-{#if $gameCtx.isSpriteLoaded && $gameCtx.isFontLoaded}
+{#if $gameCtx.isSpriteLoaded && $gameCtx.isFontLoaded && $gameCtx.isAudioLoaded}
   <Monitor />
   <Controller />
+{:else}
+  <div class="loader">{`{}`}</div>
 {/if}
+
+<style>
+  .loader {
+    color: var(--light100);
+    font-size: 72px;
+    animation: spin 0.5s infinite linear;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

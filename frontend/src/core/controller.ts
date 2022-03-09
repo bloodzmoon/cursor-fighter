@@ -5,7 +5,6 @@ export const controllerCtx = writable(createController())
 
 function createController(): IControllerContext {
   return {
-    isLoading: false,
     [ButtonCode.ARROW_UP]: false,
     [ButtonCode.ARROW_RIGHT]: false,
     [ButtonCode.ARROW_DOWN]: false,
@@ -17,7 +16,6 @@ function createController(): IControllerContext {
 }
 
 type IControllerContext = {
-  isLoading: boolean
   [ButtonCode.ARROW_UP]: boolean
   [ButtonCode.ARROW_RIGHT]: boolean
   [ButtonCode.ARROW_DOWN]: boolean

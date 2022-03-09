@@ -3,24 +3,22 @@
   import { omit } from 'lodash'
   import * as PIXI from 'pixi.js'
 
-  import { AppLayer, AppSize } from 'core/constant'
-  import { appCtx } from 'core/app'
   import { gameCtx } from 'core/game'
   import { GameEvent, MessageObject } from 'core/event'
-  import { controllerCtx } from 'core/controller'
+  import { GameLayer, GameScreen } from 'core/constant'
 
-  import Player from './Player.svelte'
-  import OtherPlayer from './OtherPlayer.svelte'
+  import Player from 'components/Player.svelte'
+  import OtherPlayer from 'components/OtherPlayer.svelte'
 
   onMount(() => {
     connectToArena()
 
     const bg = new PIXI.Graphics()
-    bg.zIndex = AppLayer.BACKGROUND
+    bg.zIndex = GameLayer.BACKGROUND
     bg.beginFill(0x21252b)
-      .drawRect(0, 0, AppSize.WIDTH, AppSize.HEIGHT)
+      .drawRect(0, 0, GameScreen.WIDTH, GameScreen.HEIGHT)
       .endFill()
-    $appCtx.stage.addChild(bg)
+    $gameCtx.monitor.addChild(bg)
   })
 
   async function connectToArena() {
@@ -44,9 +42,7 @@
       switch (msg.event) {
         case GameEvent.SYNC:
           const { fighters } = msg.payload
-
           $gameCtx.fighters = omit(fighters, $gameCtx.me.id)
-          $controllerCtx.isLoading = false
           break
       }
     }
@@ -54,6 +50,6 @@
 </script>
 
 <Player />
-{#each Object.values($gameCtx.fighters) as fighter}
-  <OtherPlayer fighterId={fighter.id} fighterName={fighter.name} />
+{#each Object.values($gameCtx.fighters) as fighter (fighter.id)}
+  <OtherPlayer {fighter} />
 {/each}

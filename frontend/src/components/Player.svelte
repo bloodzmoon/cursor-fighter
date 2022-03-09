@@ -2,63 +2,61 @@
   import { onMount, onDestroy } from 'svelte'
   import { clamp } from 'lodash'
   import { MotionBlurFilter } from '@pixi/filter-motion-blur'
+  import { sound } from '@pixi/sound'
   import * as PIXI from 'pixi.js'
   import vec2 from 'gl-vec2'
 
-  import { appCtx } from 'core/app'
+  import { controllerCtx } from 'core/controller'
+  import { gameCtx } from 'core/game'
+  import { GameEvent, MessageObject } from 'core/event'
   import {
-    AppLayer,
-    AppSize,
+    GameLayer,
+    GameScreen,
     AttackType,
     ButtonCode,
     IAttack,
+    GameFX,
+    GameIMG,
   } from 'core/constant'
-  import { controllerCtx } from 'core/controller'
-  import { monitorCtx } from 'core/monitor'
-  import { gameCtx } from 'core/game'
-  import { GameEvent, MessageObject } from 'core/event'
   import utils from 'core/utils'
 
-  import cursor01 from 'assets/img/cursor01.png'
-  import bulletImg from 'assets/img/bullet.png'
-
-  let self = PIXI.Sprite.from(cursor01)
+  let self: PIXI.Sprite
+  let name: PIXI.Text
   let speed = 0.1
   let friction = 0.02 // 0 - 1
   let velocity = [0, 0]
   let attacks = <IAttack[]>[]
-  let name = new PIXI.Text('', {
-    fontFamily: 'Pokemon',
-    fontSize: 20,
-    fill: 0xfafafa55,
-  })
-  let renderedObjects = <any[]>[]
-  let tickerFunctions = <any[]>[]
-
-  $: name.text = $gameCtx.me.name
 
   onMount(() => {
-    self.zIndex = AppLayer.GAME_OBJECT
-    self.x = AppSize.WIDTH / 2
-    self.y = AppSize.HEIGHT / 2
-    self.anchor.set(0.5, 0.5)
-    self.mask = $monitorCtx.mask
-    $appCtx.stage.addChild(self)
+    self = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.CURSOR_1].texture
+    )
+    self.zIndex = GameLayer.GAME_OBJECT
+    self.x = GameScreen.WIDTH / 2
+    self.y = GameScreen.HEIGHT / 2
+    self.anchor.set(0.5)
+    $gameCtx.monitor.addChild(self)
 
-    name.zIndex = AppLayer.GAME_OBJECT + 1
+    name = new PIXI.Text('', {
+      fontFamily: 'Pokemon',
+      fontSize: 20,
+      fill: 0xfafafa55,
+    })
+    name.zIndex = GameLayer.GAME_UI
     name.anchor.set(0.5)
-    name.mask = $monitorCtx.mask
-    $appCtx.stage.addChild(name)
+    name.text = $gameCtx.me.name
+    $gameCtx.monitor.addChild(name)
 
-    $appCtx.ticker.add(handlePlayerMovement)
-    $appCtx.ticker.add(handlePlayerAttack)
+    $gameCtx.app.ticker.add(handlePlayerMovement)
+    $gameCtx.app.ticker.add(handlePlayerAttack)
   })
 
   onDestroy(() => {
-    utils.cleanupAppObjects(tickerFunctions, renderedObjects)
+    $gameCtx.app.ticker.remove(handlePlayerMovement)
+    $gameCtx.app.ticker.remove(handlePlayerAttack)
   })
 
-  function handlePlayerMovement() {
+  function handlePlayerMovement(dt: number) {
     // sync via socket
     if ($gameCtx.me._socket.readyState === WebSocket.OPEN) {
       const { _socket, ...fighter } = $gameCtx.me
@@ -83,12 +81,12 @@
     vec2.normalize(delta, delta)
     vec2.scaleAndAdd(velocity, velocity, delta, speed)
 
-    if (self.x < 0 || self.x > AppSize.WIDTH) {
-      self.x = clamp(self.x, 0, AppSize.WIDTH)
+    if (self.x < 0 || self.x > GameScreen.WIDTH) {
+      self.x = clamp(self.x, 0, GameScreen.WIDTH)
       velocity[0] *= -1
     }
-    if (self.y < 0 || self.y > AppSize.HEIGHT) {
-      self.y = clamp(self.y, 0, AppSize.HEIGHT)
+    if (self.y < 0 || self.y > GameScreen.HEIGHT) {
+      self.y = clamp(self.y, 0, GameScreen.HEIGHT)
       velocity[1] *= -1
     }
     velocity[0] *= 1 - friction
@@ -103,8 +101,11 @@
   function handlePlayerAttack() {
     // Create attack object
     utils.onButtonClick(ButtonCode.SQUARE, () => {
-      const bullet = PIXI.Sprite.from(bulletImg)
-      bullet.zIndex = AppLayer.GAME_OBJECT
+      sound.play(GameFX.ATK_PISTOL)
+      const bullet = PIXI.Sprite.from(
+        $gameCtx.app.loader.resources[GameIMG.ATK_PISTOL].texture
+      )
+      bullet.zIndex = GameLayer.GAME_OBJECT
       bullet.anchor.set(0.5)
       bullet.position.set(self.x, self.y)
       bullet.rotation = self.rotation
@@ -113,7 +114,7 @@
       const bulletVelocity = vec2.scale([], playerVelocity, 20)
       bullet.filters = [new MotionBlurFilter(bulletVelocity)]
 
-      $appCtx.stage.addChild(bullet)
+      $gameCtx.monitor.addChild(bullet)
       attacks.push({
         type: AttackType.BULLET,
         velocity: bulletVelocity,
@@ -137,11 +138,11 @@
       // Clean up
       if (
         attack.object.x < 0 ||
-        attack.object.x > AppSize.WIDTH ||
+        attack.object.x > GameScreen.WIDTH ||
         attack.object.y < 0 ||
-        attack.object.y > AppSize.HEIGHT
+        attack.object.y > GameScreen.HEIGHT
       ) {
-        $appCtx.stage.removeChild(attack.object)
+        $gameCtx.monitor.removeChild(attack.object)
         attacks.splice(i, 1)
       }
     }
