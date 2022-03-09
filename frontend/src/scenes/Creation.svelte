@@ -69,7 +69,7 @@
         utils.lastEnum(Focus)
       )
     })
-    utils.onButtonClick(ButtonCode.CIRCLE, () => {
+    utils.onButtonClick(ButtonCode.CIRCLE, async () => {
       if (!fighterName.trim().length) {
         currentFocus = Focus.FIGHTER_NAME
         return
@@ -81,12 +81,12 @@
 
       // Go to next scene
       $gameCtx.isControllerLoading = true
-      $gameCtx.scene = GameScene.PLAY_DEATH_MATCH
       $gameCtx.arenaId = arenaId
       $gameCtx.me = {
         ...$gameCtx.me,
         name: fighterName,
       }
+      $gameCtx.scene = GameScene.PLAY_DEATH_MATCH
     })
 
     // Render UI

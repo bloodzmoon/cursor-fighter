@@ -27,9 +27,18 @@ function onButtonClick(buttonCode: ButtonCode, callback: () => void) {
   }
 }
 
+function delay(millisecond: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('OK')
+    }, millisecond)
+  })
+}
+
 export default {
   radiansToVector,
   lastEnum,
   firstEnum,
   onButtonClick,
+  delay,
 }

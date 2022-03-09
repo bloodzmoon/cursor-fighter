@@ -5,13 +5,15 @@ import * as PIXI from 'pixi.js'
 import WebFont from 'webfontloader'
 
 import {
-  FighterWithWebSocket,
   Fighter,
   GameScene,
   GameLayer,
   GameIMG,
   GameFX,
   GameScreen,
+  Attack,
+  FighterMe,
+  FighterType,
 } from 'core/constant'
 
 // ===== Import assets =====
@@ -73,7 +75,7 @@ function createGameContext() {
     isAudioLoaded: false,
     isFontLoaded: false,
     isMonitorActive: true,
-    isControllerLoading: true,
+    isControllerLoading: false,
 
     scene: GameScene.INIT,
     app,
@@ -82,14 +84,27 @@ function createGameContext() {
     controller,
 
     arenaId: '',
-    me: <FighterWithWebSocket>{
+    fighters: <Record<string, Fighter>>{},
+    attacks: <Attack[]>[],
+    me: <FighterMe>{
       _socket: null,
       id: '',
       name: '',
       position: [0, 0],
+      velocity: [0, 0],
       rotation: 0,
+      type: FighterType.ASSULT,
+      ammo: 0,
+      maxAmmo: 0,
+      health: 0,
+      maxHealth: 0,
+      healthRegen: 0,
+      mana: 0,
+      maxMana: 0,
+      manaRegen: 0,
+      fireRate: 0,
+      speed: 0,
     },
-    fighters: <Record<string, Fighter>>{},
   }
 }
 

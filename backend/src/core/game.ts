@@ -2,6 +2,7 @@ import { WebSocket, Server } from 'ws'
 import { get, mapValues, omit } from 'lodash'
 
 import { GameEvent, MessageObject } from './event'
+import { Fighter } from './constant'
 
 export const ARENAS: Record<
   string,
@@ -9,13 +10,6 @@ export const ARENAS: Record<
     fighters: Record<string, FighterWithSocket>
   }
 > = {}
-
-export type Fighter = {
-  id: string
-  name: string
-  rotation: number
-  position: number[]
-}
 
 export type FighterWithSocket = Fighter & { _socket: WebSocket }
 
@@ -30,7 +24,7 @@ const broadcast = (arenaId: string, message: string, sender?: WebSocket) => {
   }
 }
 
-const onFighterJoin = (socket: WebSocket) => {
+const onFighterJoin = () => {
   console.log('New Fighter has joined the game!')
 }
 

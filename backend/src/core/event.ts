@@ -1,4 +1,4 @@
-import { Fighter } from './game'
+import { Fighter, FighterType } from './constant'
 
 export enum GameEvent {
   FIRST_JOIN,
@@ -10,7 +10,14 @@ export type MessageObject = GameEventFirstJoin | GameEventSync | GameEventSyncMe
 
 export type GameEventFirstJoin = {
   event: GameEvent.FIRST_JOIN
-  payload: Fighter & { arenaId: string }
+  payload: {
+    arenaId: string
+    type: FighterType
+    id: string
+    name: string
+    rotation: number
+    position: number[]
+  }
 }
 
 export type GameEventSync = {
@@ -22,5 +29,11 @@ export type GameEventSync = {
 
 export type GameEventSyncMe = {
   event: GameEvent.SYNC_ME
-  payload: Fighter & { arenaId: string }
+  payload: {
+    arenaId: string
+    type: FighterType
+    id: string
+    rotation: number
+    position: number[]
+  }
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import { omit } from 'lodash'
   import * as PIXI from 'pixi.js'
 
@@ -7,18 +7,24 @@
   import { GameEvent, MessageObject } from 'core/event'
   import { GameLayer, GameScreen } from 'core/constant'
 
-  import Player from 'components/Player.svelte'
-  import OtherPlayer from 'components/OtherPlayer.svelte'
+  import Fighter from 'components/Fighter.svelte'
+  import OtherFighter from 'components/OtherFighter.svelte'
+
+  let bg: PIXI.Graphics
 
   onMount(() => {
     connectToArena()
 
-    const bg = new PIXI.Graphics()
+    bg = new PIXI.Graphics()
     bg.zIndex = GameLayer.BACKGROUND
     bg.beginFill(0x21252b)
       .drawRect(0, 0, GameScreen.WIDTH, GameScreen.HEIGHT)
       .endFill()
-    $gameCtx.monitor.addChild(bg)
+    $gameCtx.app.stage.addChild(bg)
+  })
+
+  onDestroy(() => {
+    $gameCtx.app.stage.removeChild(bg)
   })
 
   async function connectToArena() {
@@ -26,15 +32,19 @@
     $gameCtx.me._socket = socket
 
     socket.onopen = () => {
-      const { _socket, ...fighter } = $gameCtx.me
       const msg: MessageObject = {
         event: GameEvent.FIRST_JOIN,
         payload: {
-          ...fighter,
           arenaId: $gameCtx.arenaId,
+          id: $gameCtx.me.id,
+          type: $gameCtx.me.type,
+          name: $gameCtx.me.name,
+          position: $gameCtx.me.position,
+          rotation: $gameCtx.me.rotation,
         },
       }
       socket.send(JSON.stringify(msg))
+      $gameCtx.isControllerLoading = false
     }
 
     socket.onmessage = (message) => {
@@ -49,7 +59,7 @@
   }
 </script>
 
-<Player />
+<Fighter />
 {#each Object.values($gameCtx.fighters) as fighter (fighter.id)}
-  <OtherPlayer {fighter} />
+  <OtherFighter {fighter} />
 {/each}

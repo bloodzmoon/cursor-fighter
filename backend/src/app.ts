@@ -8,7 +8,7 @@ const app = new WebSocket.Server({
 })
 
 app.on('connection', (socket) => {
-  game.onFighterJoin(socket)
+  game.onFighterJoin()
 
   socket.on('message', (message) => {
     game.onGameEvent(socket, app, message.toString())

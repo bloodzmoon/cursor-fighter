@@ -75,20 +75,41 @@ export enum GameFX {
 }
 
 export enum AttackType {
-  BULLET,
+  PISTOL,
 }
 
-export type IAttack = {
+export type Attack = {
+  fighterId: string
   type: AttackType
   velocity: number[]
-  object: PIXI.Sprite
+  sprite: PIXI.Sprite
 }
 
 export type Fighter = {
+  type: FighterType
   id: string
   name: string
   rotation: number
   position: number[]
 }
 
-export type FighterWithWebSocket = Fighter & { _socket?: WebSocket }
+export type FighterMe = Fighter & {
+  _socket?: WebSocket
+  type: FighterType
+  health: number
+  maxHealth: number
+  healthRegen: number
+  mana: number
+  maxMana: number
+  manaRegen: number
+  ammo: number
+  maxAmmo: number
+  fireRate: number
+  speed: number
+  velocity: number[]
+}
+
+export enum FighterType {
+  INIT,
+  ASSULT,
+}
