@@ -4,7 +4,7 @@ import { get, mapValues, merge } from 'lodash'
 import { GameEvent, MessageObject } from './event'
 import { Attack, Fighter } from './constant'
 
-const SYNC_RATE = 50
+const SYNC_RATE = 60
 
 export const ARENAS: Record<
   string,

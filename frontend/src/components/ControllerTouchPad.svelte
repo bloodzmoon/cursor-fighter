@@ -11,18 +11,6 @@
     WIDTH = 164,
     HEIGHT = 88,
   }
-  enum Heart {
-    X = TouchPadSize.WIDTH - 40,
-    Y = TouchPadSize.HEIGHT - 36,
-    WIDTH = 32,
-    HEIGHT = 28,
-  }
-  enum Star {
-    X = 12,
-    Y = TouchPadSize.HEIGHT - 40,
-    WIDTH = 32,
-    HEIGHT = 30,
-  }
 
   const LAYER = GameLayer.CONTROLLER + 1
 
@@ -33,12 +21,15 @@
   let loadingText: PIXI.Text
 
   let fightUI: PIXI.Container
-  let heart: PIXI.Sprite
-  let heartGrey: PIXI.Sprite
-  let heartMask: PIXI.Graphics
-  let star: PIXI.Sprite
-  let starGrey: PIXI.Sprite
-  let starMask: PIXI.Graphics
+  let uiOutline: PIXI.Sprite
+  let healthText: PIXI.Text
+  let ammoText: PIXI.Text
+  let gemSkill1: PIXI.Sprite
+  let gemSkill1Mask: PIXI.Graphics
+  let gemSkill2: PIXI.Sprite
+  let gemSkill2Mask: PIXI.Graphics
+  let gemSkillUlt: PIXI.Sprite
+  let gemSkillUltMask: PIXI.Graphics
 
   onMount(() => {
     touchPad = new PIXI.Container()
@@ -64,7 +55,6 @@
       fontSize: 28,
       fill: 0xffffff,
     })
-    loadingIcon.zIndex = LAYER
     loadingIcon.anchor.set(0.5)
     loadingIcon.position.set(
       TouchPadSize.WIDTH / 2,
@@ -77,7 +67,6 @@
       fontSize: 20,
       fill: 0xffffff,
     })
-    loadingText.zIndex = LAYER
     loadingText.anchor.set(0.5)
     loadingText.position.set(
       TouchPadSize.WIDTH / 2,
@@ -87,51 +76,67 @@
   }
 
   function initFightUI() {
-    heartGrey = PIXI.Sprite.from(
-      $gameCtx.app.loader.resources[GameIMG.HEART_GREY].texture
+    healthText = new PIXI.Text('', {
+      fontFamily: 'Pokemon',
+      fill: 0xc4c4c4,
+    })
+    healthText.anchor.set(1, 0)
+    healthText.x = 32
+    healthText.y = 46
+    fightUI.addChild(healthText)
+
+    ammoText = new PIXI.Text('', {
+      fontFamily: 'Pokemon',
+      fill: 0xc4c4c4,
+    })
+    ammoText.x = 134
+    ammoText.y = 46
+    fightUI.addChild(ammoText)
+
+    gemSkillUlt = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.GEM_SKILL_ULT].texture
     )
-    heartGrey.zIndex = LAYER
-    heartGrey.x = Heart.X
-    heartGrey.y = Heart.Y
-    fightUI.addChild(heartGrey)
+    gemSkillUlt.scale.set(0.5)
+    gemSkillUlt.x = 68
+    gemSkillUlt.y = 12
+    fightUI.addChild(gemSkillUlt)
 
-    heart = PIXI.Sprite.from(
-      $gameCtx.app.loader.resources[GameIMG.HEART].texture
+    gemSkillUltMask = new PIXI.Graphics()
+    gemSkillUltMask.beginFill().drawRect(68, 12, 26.5, 53).endFill()
+    gemSkillUlt.mask = gemSkillUltMask
+    fightUI.addChild(gemSkillUltMask)
+
+    gemSkill1 = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.GEM_SKILL].texture
     )
-    heart.zIndex = LAYER + 1
-    heart.x = Heart.X
-    heart.y = Heart.Y
-    fightUI.addChild(heart)
+    gemSkill1.scale.set(-0.5, 0.5)
+    gemSkill1.x = 66
+    gemSkill1.y = 52
+    fightUI.addChild(gemSkill1)
 
-    heartMask = new PIXI.Graphics()
-    heartMask
-      .beginFill()
-      .drawRect(Heart.X, Heart.Y, Heart.WIDTH, Heart.HEIGHT)
-      .endFill()
-    heart.mask = heartMask
-    fightUI.addChild(heartMask)
+    gemSkill1Mask = new PIXI.Graphics()
+    gemSkill1Mask.beginFill().drawRect(66, 52, -16.5, 16).endFill()
+    gemSkill1.mask = gemSkill1Mask
+    fightUI.addChild(gemSkill1Mask)
 
-    starGrey = PIXI.Sprite.from(
-      $gameCtx.app.loader.resources[GameIMG.STAR_GREY].texture
+    gemSkill2 = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.GEM_SKILL].texture
     )
-    starGrey.zIndex = LAYER
-    starGrey.x = Star.X
-    starGrey.y = Star.Y
-    fightUI.addChild(starGrey)
+    gemSkill2.scale.set(0.5)
+    gemSkill2.x = 98
+    gemSkill2.y = 52
+    fightUI.addChild(gemSkill2)
 
-    star = PIXI.Sprite.from($gameCtx.app.loader.resources[GameIMG.STAR].texture)
-    star.zIndex = LAYER + 1
-    star.x = Star.X
-    star.y = Star.Y
-    fightUI.addChild(star)
+    gemSkill2Mask = new PIXI.Graphics()
+    gemSkill2Mask.beginFill().drawRect(98, 52, 16.5, 16).endFill()
+    gemSkill2.mask = gemSkill2Mask
+    fightUI.addChild(gemSkill2Mask)
 
-    starMask = new PIXI.Graphics()
-    starMask
-      .beginFill()
-      .drawRect(Star.X, Star.Y, Star.WIDTH, Star.HEIGHT)
-      .endFill()
-    star.mask = starMask
-    fightUI.addChild(starMask)
+    uiOutline = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.FIGHT_UI].texture
+    )
+    uiOutline.scale.set(0.5)
+    fightUI.addChild(uiOutline)
   }
 
   function handleUI(dt: number) {
@@ -149,29 +154,36 @@
   }
 
   function handleFighterUI() {
-    const heartRemain =
-      (Heart.HEIGHT * $gameCtx.me.health) / $gameCtx.me.maxHealth
-    heartMask.clear()
-    heartMask
+    healthText.text = Math.ceil($gameCtx.me.health).toFixed(0)
+
+    if ($gameCtx.me.isReloading) {
+      ammoText.text = '-'
+    } else {
+      ammoText.text = Math.ceil($gameCtx.me.ammo).toFixed(0)
+    }
+
+    const skill1CoolDown =
+      (16 * $gameCtx.me.skill1Timer) / $gameCtx.me.skill1CoolDown
+    gemSkill1Mask.clear()
+    gemSkill1Mask
       .beginFill()
-      .drawRect(
-        Heart.X,
-        Heart.Y + Heart.HEIGHT - heartRemain,
-        Heart.WIDTH,
-        heartRemain
-      )
+      .drawRect(66, 52 + 16 - skill1CoolDown, -16.5, skill1CoolDown)
       .endFill()
 
-    const manaRemain = (Star.HEIGHT * $gameCtx.me.mana) / $gameCtx.me.maxMana
-    starMask.clear()
-    starMask
+    const skill2CoolDown =
+      (16 * $gameCtx.me.skill2Timer) / $gameCtx.me.skill2CoolDown
+    gemSkill2Mask.clear()
+    gemSkill2Mask
       .beginFill()
-      .drawRect(
-        Star.X,
-        Star.Y + Star.HEIGHT - manaRemain,
-        Star.WIDTH,
-        manaRemain
-      )
+      .drawRect(98, 52 + 16 - skill2CoolDown, 16.5, skill2CoolDown)
+      .endFill()
+
+    const skillUltCoolDown =
+      (53 * $gameCtx.me.skillUltTimer) / $gameCtx.me.skillUltCoolDown
+    gemSkillUltMask.clear()
+    gemSkillUltMask
+      .beginFill()
+      .drawRect(68, 12 + 53 - skillUltCoolDown, 26.5, skillUltCoolDown)
       .endFill()
   }
 </script>

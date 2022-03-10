@@ -34,15 +34,16 @@ import btnStickImg from 'assets/img/ui/stick.png'
 import blackMonitorImg from 'assets/img/ui/black.png'
 import cursor1Img from 'assets/img/cursor/cursor01.png'
 import atkPistolImg from 'assets/img/attack/bullet.png'
-import heartImg from 'assets/img/ui/heart.png'
-import heartGreyImg from 'assets/img/ui/heart_grey.png'
-import starImg from 'assets/img/ui/star.png'
-import starGreyImg from 'assets/img/ui/star_grey.png'
+import fightUiImg from 'assets/img/ui/fight_ui.png'
+import gemSkillImg from 'assets/img/ui/skill_ui.png'
+import gemSkillUltImg from 'assets/img/ui/skill_ulti_ui.png'
 
 import uiSelectFX from 'assets/audio/ui/ui_select.wav'
 import controllerTapFX from 'assets/audio/ui/tap.wav'
 import monitorFX from 'assets/audio/ui/ui_monitor.wav'
 import pistolFX from 'assets/audio/attack/pistol.wav'
+import ammoOutFX from 'assets/audio/attack/ammo_out.wav'
+import reloadFX from 'assets/audio/attack/reload.wav'
 
 // ===== Game context =====
 export const gameCtx = writable(createGameContext())
@@ -104,10 +105,17 @@ function createGameContext() {
       health: 0,
       maxHealth: 0,
       healthRegen: 0,
-      mana: 0,
-      maxMana: 0,
-      manaRegen: 0,
+      skill1CoolDown: 0,
+      skill1Timer: 0,
+      skill2CoolDown: 0,
+      skill2Timer: 0,
+      skillUltCoolDown: 0,
+      skillUltTimer: 0,
       fireRate: 0,
+      fireTimer: 0,
+      isReloading: false,
+      reloadDelay: 0,
+      reloadTimer: 0,
       speed: 0,
       attacks: <Record<string, Attack>>{},
     },
@@ -136,10 +144,9 @@ export async function loadAssests() {
       .add(GameIMG.MONITOR_OFF, blackMonitorImg)
       .add(GameIMG.CURSOR_1, cursor1Img)
       .add(GameIMG.ATK_PISTOL, atkPistolImg)
-      .add(GameIMG.HEART, heartImg)
-      .add(GameIMG.HEART_GREY, heartGreyImg)
-      .add(GameIMG.STAR, starImg)
-      .add(GameIMG.STAR_GREY, starGreyImg)
+      .add(GameIMG.FIGHT_UI, fightUiImg)
+      .add(GameIMG.GEM_SKILL, gemSkillImg)
+      .add(GameIMG.GEM_SKILL_ULT, gemSkillUltImg)
       .load()
       .onComplete.once(() => {
         $gameCtx.isSpriteLoaded = true
@@ -170,6 +177,8 @@ export async function loadAssests() {
       .add(GameFX.CONTROLLER_TAP, controllerTapFX)
       .add(GameFX.MONITOR_POWER, monitorFX)
       .add(GameFX.ATK_PISTOL, pistolFX)
+      .add(GameFX.AMMO_OUT_PISTOL, ammoOutFX)
+      .add(GameFX.RELOAD_PISTOL, reloadFX)
       .load()
       .onComplete.once(() => {
         $gameCtx.isAudioLoaded = true

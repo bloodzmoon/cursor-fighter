@@ -17,6 +17,7 @@
   let self: PIXI.Sprite
   let name: PIXI.Text
   let healthRegenInterval: ReturnType<typeof setInterval>
+  let skillInterval: ReturnType<typeof setInterval>
 
   onMount(() => {
     initFighter()
@@ -26,6 +27,7 @@
 
   onDestroy(() => {
     clearInterval(healthRegenInterval)
+    clearInterval(skillInterval)
     $gameCtx.app.ticker.remove(handlePlayerMovement)
     $gameCtx.app.ticker.remove(handleNamePosition)
     $gameCtx.monitor.removeChild(self)
@@ -36,16 +38,22 @@
     switch ($gameCtx.me.type) {
       case FighterType.ASSULT: {
         $gameCtx.me.maxHealth = 100
-        $gameCtx.me.healthRegen = 5
-        $gameCtx.me.maxMana = 50
-        $gameCtx.me.manaRegen = 5
+        $gameCtx.me.healthRegen = 2
+        $gameCtx.me.skill1CoolDown = 4
+        $gameCtx.me.skill2CoolDown = 8
+        $gameCtx.me.skillUltCoolDown = 30
         $gameCtx.me.maxAmmo = 12
-        $gameCtx.me.fireRate = 1
+        $gameCtx.me.fireRate = 1.6
         $gameCtx.me.speed = 0.1
+        $gameCtx.me.reloadDelay = 2.4
 
         $gameCtx.me.health = $gameCtx.me.maxHealth
-        $gameCtx.me.mana = 0
         $gameCtx.me.ammo = $gameCtx.me.maxAmmo
+        $gameCtx.me.skill1Timer = 0
+        $gameCtx.me.skill2Timer = 0
+        $gameCtx.me.skillUltTimer = 0
+        $gameCtx.me.fireTimer = 1
+        $gameCtx.me.reloadTimer = 0
 
         self = PIXI.Sprite.from(
           $gameCtx.app.loader.resources[GameIMG.CURSOR_1].texture
@@ -59,7 +67,8 @@
       }
     }
 
-    healthRegenInterval = setInterval(handlePlayerRegen, 1000)
+    skillInterval = setInterval(handleSkillCoolDown, 100)
+    healthRegenInterval = setInterval(handleHealthRegen, 1000)
     name = new PIXI.Text($gameCtx.me.name, {
       fontFamily: 'Pokemon',
       fontSize: 20,
@@ -101,17 +110,43 @@
     $gameCtx.me.velocity = velocity
   }
 
-  function handlePlayerRegen() {
+  function handleHealthRegen() {
     $gameCtx.me.health = clamp(
       $gameCtx.me.health + $gameCtx.me.healthRegen,
       0,
       $gameCtx.me.maxHealth
     )
+  }
 
-    $gameCtx.me.mana = clamp(
-      $gameCtx.me.mana + $gameCtx.me.manaRegen,
+  function handleSkillCoolDown() {
+    $gameCtx.me.skill1Timer = clamp(
+      $gameCtx.me.skill1Timer + 0.1,
       0,
-      $gameCtx.me.maxMana
+      $gameCtx.me.skill1CoolDown
+    )
+
+    $gameCtx.me.skill2Timer = clamp(
+      $gameCtx.me.skill2Timer + 0.1,
+      0,
+      $gameCtx.me.skill2CoolDown
+    )
+
+    $gameCtx.me.skillUltTimer = clamp(
+      $gameCtx.me.skillUltTimer + 0.1,
+      0,
+      $gameCtx.me.skillUltCoolDown
+    )
+
+    $gameCtx.me.reloadTimer = clamp(
+      $gameCtx.me.reloadTimer + 0.1,
+      0,
+      $gameCtx.me.reloadDelay
+    )
+
+    $gameCtx.me.fireTimer = clamp(
+      $gameCtx.me.fireTimer + 0.1 * $gameCtx.me.fireRate,
+      0,
+      1
     )
   }
 

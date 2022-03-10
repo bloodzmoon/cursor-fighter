@@ -62,10 +62,9 @@ export enum GameIMG {
   BTN_MENU = 'IMG_BTN_MENU',
   BTN_STICK = 'IMG_BTN_STICK',
   MONITOR_OFF = 'IMG_MONITOR_OFF',
-  HEART = 'IMG_HEART',
-  HEART_GREY = 'IMG_HEART_GREY',
-  STAR = 'IMG_STAR',
-  STAR_GREY = 'IMG_STAR_GREY',
+  FIGHT_UI = 'IMG_FIGHT_UI',
+  GEM_SKILL_ULT = 'IMG_GEM_SKILL_ULT',
+  GEM_SKILL = 'IMG_GEM_SKILL',
 
   CURSOR_1 = 'IMG_CURSOR_1',
   ATK_PISTOL = 'IMG_ATK_PISTOL',
@@ -76,6 +75,8 @@ export enum GameFX {
   CONTROLLER_TAP = 'FX_CONTROLLER_TAP',
   MONITOR_POWER = 'FX_MONITOR_POWER',
   ATK_PISTOL = 'FX_ATK_PISTOL',
+  RELOAD_PISTOL = 'FX_RELOAD_PISTOL',
+  AMMO_OUT_PISTOL = 'FX_AMMO_OUT_PISTOL',
 }
 
 export enum AttackType {
@@ -120,12 +121,19 @@ export type Fighter = {
   health: number
   maxHealth: number
   healthRegen: number
-  mana: number
-  maxMana: number
-  manaRegen: number
+  skill1CoolDown: number
+  skill1Timer: number
+  skill2CoolDown: number
+  skill2Timer: number
+  skillUltCoolDown: number
+  skillUltTimer: number
   ammo: number
   maxAmmo: number
   fireRate: number
+  fireTimer: number
+  reloadDelay: number
+  reloadTimer: number
+  isReloading: boolean
 
   attacks: Record<string, Attack>
 }
