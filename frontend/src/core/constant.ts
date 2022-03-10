@@ -62,6 +62,10 @@ export enum GameIMG {
   BTN_MENU = 'IMG_BTN_MENU',
   BTN_STICK = 'IMG_BTN_STICK',
   MONITOR_OFF = 'IMG_MONITOR_OFF',
+  HEART = 'IMG_HEART',
+  HEART_GREY = 'IMG_HEART_GREY',
+  STAR = 'IMG_STAR',
+  STAR_GREY = 'IMG_STAR_GREY',
 
   CURSOR_1 = 'IMG_CURSOR_1',
   ATK_PISTOL = 'IMG_ATK_PISTOL',
@@ -78,14 +82,24 @@ export enum AttackType {
   PISTOL,
 }
 
+export type AttackSync = {
+  id: string
+  fighterId: string
+  type: AttackType
+  velocity: number[]
+  rotation: number
+  position: number[]
+}
+
 export type Attack = {
+  id: string
   fighterId: string
   type: AttackType
   velocity: number[]
   sprite: PIXI.Sprite
 }
 
-export type Fighter = {
+export type FighterSync = {
   type: FighterType
   id: string
   name: string
@@ -93,9 +107,16 @@ export type Fighter = {
   position: number[]
 }
 
-export type FighterMe = Fighter & {
+export type Fighter = {
   _socket?: WebSocket
   type: FighterType
+  id: string
+  name: string
+  rotation: number
+  position: number[]
+  speed: number
+  velocity: number[]
+
   health: number
   maxHealth: number
   healthRegen: number
@@ -105,8 +126,8 @@ export type FighterMe = Fighter & {
   ammo: number
   maxAmmo: number
   fireRate: number
-  speed: number
-  velocity: number[]
+
+  attacks: Record<string, Attack>
 }
 
 export enum FighterType {

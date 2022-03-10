@@ -1,65 +1,61 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { omit } from 'lodash'
   import * as PIXI from 'pixi.js'
 
   import { gameCtx } from 'core/game'
-  import { GameEvent, MessageObject } from 'core/event'
   import { GameLayer, GameScreen } from 'core/constant'
 
+  import WebSocketHandler from 'components/WebSocketHandler.svelte'
   import Fighter from 'components/Fighter.svelte'
-  import OtherFighter from 'components/OtherFighter.svelte'
+  import FighterAttack from 'components/FighterAttack.svelte'
+  import Enemy from 'components/Enemy.svelte'
+  import EnemyAttack from 'components/EnemyAttack.svelte'
 
-  let bg: PIXI.Graphics
+  let bg: PIXI.Sprite
 
   onMount(() => {
-    connectToArena()
+    initScene()
+    initCamera()
 
-    bg = new PIXI.Graphics()
-    bg.zIndex = GameLayer.BACKGROUND
-    bg.beginFill(0x21252b)
-      .drawRect(0, 0, GameScreen.WIDTH, GameScreen.HEIGHT)
-      .endFill()
-    $gameCtx.app.stage.addChild(bg)
+    $gameCtx.app.ticker.add(handleCameraMovement)
   })
 
   onDestroy(() => {
     $gameCtx.app.stage.removeChild(bg)
   })
 
-  async function connectToArena() {
-    const socket = new WebSocket(import.meta.env.VITE_SOCKET_URL)
-    $gameCtx.me._socket = socket
+  function initScene() {
+    const renderer = $gameCtx.app.renderer
+    const texture = renderer.generateTexture(
+      new PIXI.Graphics()
+        .beginFill(0x21252b)
+        .drawRect(0, 0, GameScreen.WIDTH, GameScreen.HEIGHT)
+        .endFill()
+    )
+    bg = PIXI.Sprite.from(texture)
+    bg.zIndex = GameLayer.BACKGROUND
+    $gameCtx.monitor.addChild(bg)
+  }
 
-    socket.onopen = () => {
-      const msg: MessageObject = {
-        event: GameEvent.FIRST_JOIN,
-        payload: {
-          arenaId: $gameCtx.arenaId,
-          id: $gameCtx.me.id,
-          type: $gameCtx.me.type,
-          name: $gameCtx.me.name,
-          position: $gameCtx.me.position,
-          rotation: $gameCtx.me.rotation,
-        },
-      }
-      socket.send(JSON.stringify(msg))
-      $gameCtx.isControllerLoading = false
-    }
+  function initCamera() {
+    $gameCtx.monitor.pivot.x = GameScreen.WIDTH / 2
+    $gameCtx.monitor.pivot.y = GameScreen.HEIGHT / 2
+    $gameCtx.monitor.position.x = GameScreen.WIDTH / 2
+    $gameCtx.monitor.position.y = GameScreen.HEIGHT / 2
+  }
 
-    socket.onmessage = (message) => {
-      const msg: MessageObject = JSON.parse(message.data)
-      switch (msg.event) {
-        case GameEvent.SYNC:
-          const { fighters } = msg.payload
-          $gameCtx.fighters = omit(fighters, $gameCtx.me.id)
-          break
-      }
-    }
+  function handleCameraMovement() {
+    $gameCtx.monitor.pivot.x = $gameCtx.me.position[0]
+    $gameCtx.monitor.pivot.y = $gameCtx.me.position[1]
   }
 </script>
 
+<WebSocketHandler />
 <Fighter />
+<FighterAttack />
 {#each Object.values($gameCtx.fighters) as fighter (fighter.id)}
-  <OtherFighter {fighter} />
+  <Enemy {fighter} />
+{/each}
+{#each Object.values($gameCtx.attacks) as attack (attack.id)}
+  <EnemyAttack {attack} />
 {/each}

@@ -5,15 +5,16 @@ import * as PIXI from 'pixi.js'
 import WebFont from 'webfontloader'
 
 import {
-  Fighter,
+  FighterSync,
   GameScene,
   GameLayer,
   GameIMG,
   GameFX,
   GameScreen,
   Attack,
-  FighterMe,
+  Fighter,
   FighterType,
+  AttackSync,
 } from 'core/constant'
 
 // ===== Import assets =====
@@ -33,6 +34,10 @@ import btnStickImg from 'assets/img/ui/stick.png'
 import blackMonitorImg from 'assets/img/ui/black.png'
 import cursor1Img from 'assets/img/cursor/cursor01.png'
 import atkPistolImg from 'assets/img/attack/bullet.png'
+import heartImg from 'assets/img/ui/heart.png'
+import heartGreyImg from 'assets/img/ui/heart_grey.png'
+import starImg from 'assets/img/ui/star.png'
+import starGreyImg from 'assets/img/ui/star_grey.png'
 
 import uiSelectFX from 'assets/audio/ui/ui_select.wav'
 import controllerTapFX from 'assets/audio/ui/tap.wav'
@@ -84,9 +89,9 @@ function createGameContext() {
     controller,
 
     arenaId: '',
-    fighters: <Record<string, Fighter>>{},
-    attacks: <Attack[]>[],
-    me: <FighterMe>{
+    fighters: <Record<string, FighterSync>>{},
+    attacks: <Record<string, AttackSync>>{},
+    me: <Fighter>{
       _socket: null,
       id: '',
       name: '',
@@ -104,6 +109,7 @@ function createGameContext() {
       manaRegen: 0,
       fireRate: 0,
       speed: 0,
+      attacks: <Record<string, Attack>>{},
     },
   }
 }
@@ -130,6 +136,10 @@ export async function loadAssests() {
       .add(GameIMG.MONITOR_OFF, blackMonitorImg)
       .add(GameIMG.CURSOR_1, cursor1Img)
       .add(GameIMG.ATK_PISTOL, atkPistolImg)
+      .add(GameIMG.HEART, heartImg)
+      .add(GameIMG.HEART_GREY, heartGreyImg)
+      .add(GameIMG.STAR, starImg)
+      .add(GameIMG.STAR_GREY, starGreyImg)
       .load()
       .onComplete.once(() => {
         $gameCtx.isSpriteLoaded = true

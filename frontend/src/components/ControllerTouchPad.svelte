@@ -3,7 +3,7 @@
   import * as PIXI from 'pixi.js'
 
   import { gameCtx } from 'core/game'
-  import { GameLayer, GameScene } from 'core/constant'
+  import { GameIMG, GameLayer, GameScene } from 'core/constant'
 
   export let position: number[]
 
@@ -11,9 +11,17 @@
     WIDTH = 164,
     HEIGHT = 88,
   }
-  enum HealthBar {
-    WIDTH = TouchPadSize.WIDTH - 58,
-    HEIGHT = 14,
+  enum Heart {
+    X = TouchPadSize.WIDTH - 40,
+    Y = TouchPadSize.HEIGHT - 36,
+    WIDTH = 32,
+    HEIGHT = 28,
+  }
+  enum Star {
+    X = 12,
+    Y = TouchPadSize.HEIGHT - 40,
+    WIDTH = 32,
+    HEIGHT = 30,
   }
 
   const LAYER = GameLayer.CONTROLLER + 1
@@ -25,7 +33,12 @@
   let loadingText: PIXI.Text
 
   let fightUI: PIXI.Container
-  let healthBar: PIXI.Graphics
+  let heart: PIXI.Sprite
+  let heartGrey: PIXI.Sprite
+  let heartMask: PIXI.Graphics
+  let star: PIXI.Sprite
+  let starGrey: PIXI.Sprite
+  let starMask: PIXI.Graphics
 
   onMount(() => {
     touchPad = new PIXI.Container()
@@ -38,6 +51,14 @@
     touchPad.addChild(loadingUI)
     touchPad.addChild(fightUI)
 
+    initFightUI()
+    initLoadingUI()
+
+    $gameCtx.app.ticker.add(handleUI)
+    $gameCtx.app.ticker.add(handleFighterUI)
+  })
+
+  function initLoadingUI() {
     loadingIcon = new PIXI.Text('{}', {
       fontFamily: 'Pokemon',
       fontSize: 28,
@@ -63,26 +84,55 @@
       TouchPadSize.HEIGHT / 2 + 15
     )
     loadingUI.addChild(loadingText)
+  }
 
-    let hpText = new PIXI.Text('HP', {
-      fontFamily: 'Pokemon',
-      fill: 0xc4c4c4,
-    })
-    hpText.x = 14
-    hpText.y = TouchPadSize.HEIGHT - 28
-    fightUI.addChild(hpText)
+  function initFightUI() {
+    heartGrey = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.HEART_GREY].texture
+    )
+    heartGrey.zIndex = LAYER
+    heartGrey.x = Heart.X
+    heartGrey.y = Heart.Y
+    fightUI.addChild(heartGrey)
 
-    healthBar = new PIXI.Graphics()
-    healthBar.zIndex = LAYER
-    healthBar
-      .beginFill(0xc4c4c4)
-      .drawRect(40, TouchPadSize.HEIGHT - 28, HealthBar.WIDTH, HealthBar.HEIGHT)
+    heart = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.HEART].texture
+    )
+    heart.zIndex = LAYER + 1
+    heart.x = Heart.X
+    heart.y = Heart.Y
+    fightUI.addChild(heart)
+
+    heartMask = new PIXI.Graphics()
+    heartMask
+      .beginFill()
+      .drawRect(Heart.X, Heart.Y, Heart.WIDTH, Heart.HEIGHT)
       .endFill()
-    fightUI.addChild(healthBar)
+    heart.mask = heartMask
+    fightUI.addChild(heartMask)
 
-    $gameCtx.app.ticker.add(handleUI)
-    $gameCtx.app.ticker.add(handleFighterUI)
-  })
+    starGrey = PIXI.Sprite.from(
+      $gameCtx.app.loader.resources[GameIMG.STAR_GREY].texture
+    )
+    starGrey.zIndex = LAYER
+    starGrey.x = Star.X
+    starGrey.y = Star.Y
+    fightUI.addChild(starGrey)
+
+    star = PIXI.Sprite.from($gameCtx.app.loader.resources[GameIMG.STAR].texture)
+    star.zIndex = LAYER + 1
+    star.x = Star.X
+    star.y = Star.Y
+    fightUI.addChild(star)
+
+    starMask = new PIXI.Graphics()
+    starMask
+      .beginFill()
+      .drawRect(Star.X, Star.Y, Star.WIDTH, Star.HEIGHT)
+      .endFill()
+    star.mask = starMask
+    fightUI.addChild(starMask)
+  }
 
   function handleUI(dt: number) {
     if ($gameCtx.isControllerLoading) {
@@ -99,14 +149,28 @@
   }
 
   function handleFighterUI() {
-    healthBar.clear()
-    healthBar
-      .beginFill(0xc4c4c4)
+    const heartRemain =
+      (Heart.HEIGHT * $gameCtx.me.health) / $gameCtx.me.maxHealth
+    heartMask.clear()
+    heartMask
+      .beginFill()
       .drawRect(
-        40,
-        TouchPadSize.HEIGHT - 28,
-        (HealthBar.WIDTH * $gameCtx.me.health) / $gameCtx.me.maxHealth,
-        HealthBar.HEIGHT
+        Heart.X,
+        Heart.Y + Heart.HEIGHT - heartRemain,
+        Heart.WIDTH,
+        heartRemain
+      )
+      .endFill()
+
+    const manaRemain = (Star.HEIGHT * $gameCtx.me.mana) / $gameCtx.me.maxMana
+    starMask.clear()
+    starMask
+      .beginFill()
+      .drawRect(
+        Star.X,
+        Star.Y + Star.HEIGHT - manaRemain,
+        Star.WIDTH,
+        manaRemain
       )
       .endFill()
   }

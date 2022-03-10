@@ -16,6 +16,8 @@
     GameScreen,
   } from 'core/constant'
   import utils from 'core/utils'
+  import { nanoid } from 'nanoid'
+  import { omit } from 'lodash'
 
   onMount(() => {
     $gameCtx.app.ticker.add(handleCreateAttack)
@@ -49,12 +51,14 @@
           atk.filters = [new MotionBlurFilter(atkVector)]
 
           $gameCtx.monitor.addChild(atk)
-          $gameCtx.attacks.push({
-            fighterId: $gameCtx.me.id,
+          const attackId = nanoid(10)
+          $gameCtx.me.attacks[attackId] = {
+            id: attackId,
+            fighterId: fighter.id,
             type: AttackType.PISTOL,
             sprite: atk,
             velocity: atkVector,
-          })
+          }
 
           const recoil = vec2.negate([], atkVector)
           vec2.scale(recoil, recoil, ATK_RECOIL)
@@ -67,11 +71,11 @@
   }
 
   function handleAttackMovement() {
-    for (const [i, attack] of $gameCtx.attacks.entries()) {
+    for (const [attackId, attack] of Object.entries($gameCtx.me.attacks)) {
       switch (attack.type) {
         case AttackType.PISTOL: {
-          $gameCtx.attacks[i].sprite.x += attack.velocity[0]
-          $gameCtx.attacks[i].sprite.y += attack.velocity[1]
+          $gameCtx.me.attacks[attackId].sprite.x += attack.velocity[0]
+          $gameCtx.me.attacks[attackId].sprite.y += attack.velocity[1]
 
           // clean up TODO: change to collision detect
           if (
@@ -81,7 +85,7 @@
             attack.sprite.y > GameScreen.HEIGHT
           ) {
             $gameCtx.monitor.removeChild(attack.sprite)
-            $gameCtx.attacks.splice(i, 1)
+            $gameCtx.me.attacks = omit($gameCtx.me.attacks, attackId)
           }
           break
         }

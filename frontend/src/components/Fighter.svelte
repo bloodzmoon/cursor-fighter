@@ -6,7 +6,6 @@
 
   import { controllerCtx } from 'core/controller'
   import { gameCtx } from 'core/game'
-  import { GameEvent, MessageObject } from 'core/event'
   import {
     GameLayer,
     GameScreen,
@@ -15,26 +14,25 @@
     FighterType,
   } from 'core/constant'
 
-  import AttackManager from 'components/AttackManager.svelte'
-
   let self: PIXI.Sprite
   let name: PIXI.Text
+  let healthRegenInterval: ReturnType<typeof setInterval>
 
   onMount(() => {
-    $gameCtx.app.ticker.addOnce(handleFighterStat)
+    initFighter()
     $gameCtx.app.ticker.add(handlePlayerMovement)
     $gameCtx.app.ticker.add(handleNamePosition)
-    $gameCtx.app.ticker.add(handleWebSocket)
   })
 
   onDestroy(() => {
-    $gameCtx.app.ticker.remove(handleWebSocket)
+    clearInterval(healthRegenInterval)
     $gameCtx.app.ticker.remove(handlePlayerMovement)
+    $gameCtx.app.ticker.remove(handleNamePosition)
     $gameCtx.monitor.removeChild(self)
     $gameCtx.monitor.removeChild(name)
   })
 
-  function handleFighterStat() {
+  function initFighter() {
     switch ($gameCtx.me.type) {
       case FighterType.ASSULT: {
         $gameCtx.me.maxHealth = 100
@@ -44,8 +42,9 @@
         $gameCtx.me.maxAmmo = 12
         $gameCtx.me.fireRate = 1
         $gameCtx.me.speed = 0.1
+
         $gameCtx.me.health = $gameCtx.me.maxHealth
-        $gameCtx.me.mana = $gameCtx.me.maxMana
+        $gameCtx.me.mana = 0
         $gameCtx.me.ammo = $gameCtx.me.maxAmmo
 
         self = PIXI.Sprite.from(
@@ -60,6 +59,7 @@
       }
     }
 
+    healthRegenInterval = setInterval(handlePlayerRegen, 1000)
     name = new PIXI.Text($gameCtx.me.name, {
       fontFamily: 'Pokemon',
       fontSize: 20,
@@ -101,26 +101,22 @@
     $gameCtx.me.velocity = velocity
   }
 
+  function handlePlayerRegen() {
+    $gameCtx.me.health = clamp(
+      $gameCtx.me.health + $gameCtx.me.healthRegen,
+      0,
+      $gameCtx.me.maxHealth
+    )
+
+    $gameCtx.me.mana = clamp(
+      $gameCtx.me.mana + $gameCtx.me.manaRegen,
+      0,
+      $gameCtx.me.maxMana
+    )
+  }
+
   function handleNamePosition() {
     name.x = $gameCtx.me.position[0]
     name.y = $gameCtx.me.position[1] + 28
   }
-
-  function handleWebSocket() {
-    if ($gameCtx.me._socket.readyState === WebSocket.OPEN) {
-      const msg: MessageObject = {
-        event: GameEvent.SYNC_ME,
-        payload: {
-          arenaId: $gameCtx.arenaId,
-          type: $gameCtx.me.type,
-          id: $gameCtx.me.id,
-          rotation: $gameCtx.me.rotation,
-          position: $gameCtx.me.position,
-        },
-      }
-      $gameCtx.me._socket.send(JSON.stringify(msg))
-    }
-  }
 </script>
-
-<AttackManager />

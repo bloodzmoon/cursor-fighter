@@ -6,18 +6,18 @@
   import {
     GameLayer,
     GameScreen,
-    Fighter,
+    FighterSync,
     GameIMG,
     FighterType,
   } from 'core/constant'
 
-  export let fighter: Fighter
+  export let fighter: FighterSync
 
   let self: PIXI.Sprite
   let name: PIXI.Text
 
   onMount(() => {
-    $gameCtx.app.ticker.addOnce(handleFighterStat)
+    initFighter()
     $gameCtx.app.ticker.add(handlePlayerMovement)
     $gameCtx.app.ticker.add(handleNamePosition)
   })
@@ -29,7 +29,7 @@
     $gameCtx.monitor.removeChild(name)
   })
 
-  function handleFighterStat() {
+  function initFighter() {
     switch (fighter.type) {
       case FighterType.ASSULT: {
         self = PIXI.Sprite.from(

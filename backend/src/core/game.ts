@@ -1,17 +1,19 @@
 import { WebSocket, Server } from 'ws'
-import { get, mapValues, omit } from 'lodash'
+import { get, mapValues, merge } from 'lodash'
 
 import { GameEvent, MessageObject } from './event'
-import { Fighter } from './constant'
+import { Attack, Fighter } from './constant'
+
+const SYNC_RATE = 50
 
 export const ARENAS: Record<
   string,
   {
-    fighters: Record<string, FighterWithSocket>
+    syncInterval: ReturnType<typeof setInterval>
+    fighters: Record<string, Fighter & { _socket: WebSocket }>
+    attacks: Record<string, Attack>
   }
 > = {}
-
-export type FighterWithSocket = Fighter & { _socket: WebSocket }
 
 const broadcast = (arenaId: string, message: string, sender?: WebSocket) => {
   let fighters = Object.values(get(ARENAS, [arenaId, 'fighters'], {}))
@@ -32,8 +34,14 @@ const onFighterLeft = (socket: WebSocket) => {
   for (const [arenaId, { fighters }] of Object.entries(ARENAS)) {
     for (const [fighterId, { _socket, name }] of Object.entries(fighters)) {
       if (_socket === socket) {
-        ARENAS[arenaId].fighters = omit(ARENAS[arenaId].fighters, fighterId)
         console.log(`${name} has left the game(${arenaId})`)
+        delete ARENAS[arenaId].fighters[fighterId]
+
+        // Reset arena when no player remain
+        if (!Object.keys(ARENAS[arenaId].fighters).length) {
+          clearInterval(ARENAS[arenaId].syncInterval)
+          delete ARENAS[arenaId]
+        }
         return
       }
     }
@@ -50,7 +58,9 @@ const onGameEvent = (socket: WebSocket, app: Server, message: string) => {
 
       if (!arena) {
         ARENAS[arenaId] = {
+          syncInterval: initSyncInterval(arenaId),
           fighters: { [id]: { id, _socket: socket, ...fighter } },
+          attacks: {},
         }
       } else {
         ARENAS[arenaId] = {
@@ -61,43 +71,44 @@ const onGameEvent = (socket: WebSocket, app: Server, message: string) => {
           },
         }
       }
-
-      const response: MessageObject = {
-        event: GameEvent.SYNC,
-        payload: {
-          fighters: mapValues(
-            ARENAS[arenaId].fighters,
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            ({ _socket, ...fighter }) => fighter
-          ),
-        },
-      }
-      broadcast(arenaId, JSON.stringify(response))
       break
     }
 
     case GameEvent.SYNC_ME: {
-      const { arenaId, id, ...fighter } = msg.payload
-      const fighters = get(ARENAS, [arenaId, 'fighters'])
-      fighters[id] = {
-        ...fighters[id],
-        ...fighter,
-      }
+      const { arenaId, fighter, attacks } = msg.payload
+      const _fighters = get(ARENAS, [arenaId, 'fighters'])
+      const _attacks = get(ARENAS, [arenaId, 'attacks'])
 
-      const response: MessageObject = {
-        event: GameEvent.SYNC,
-        payload: {
-          fighters: mapValues(
-            ARENAS[arenaId].fighters,
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            ({ _socket, ...fighter }) => fighter
-          ),
-        },
+      merge(_fighters[fighter.id], fighter)
+      merge(_attacks, attacks)
+
+      // Remove expired attack from arena
+      for (const [_attackId, _attack] of Object.entries(_attacks)) {
+        if (_attack.fighterId !== fighter.id) continue
+        if (Object.keys(attacks).includes(_attackId)) continue
+
+        delete _attacks[_attackId]
       }
-      broadcast(arenaId, JSON.stringify(response))
       break
     }
   }
+}
+
+const initSyncInterval = (arenaId: string) => {
+  return setInterval(() => {
+    const response: MessageObject = {
+      event: GameEvent.SYNC,
+      payload: {
+        fighters: mapValues(
+          ARENAS[arenaId].fighters,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ({ _socket, ...fighter }) => fighter
+        ),
+        attacks: ARENAS[arenaId].attacks,
+      },
+    }
+    broadcast(arenaId, JSON.stringify(response))
+  }, 1000 / SYNC_RATE)
 }
 
 export default {

@@ -1,4 +1,4 @@
-import type { Fighter, FighterType } from 'core/constant'
+import type { AttackSync, FighterSync, FighterType } from 'core/constant'
 
 export enum GameEvent {
   FIRST_JOIN,
@@ -23,7 +23,8 @@ export type GameEventFirstJoin = {
 export type GameEventSync = {
   event: GameEvent.SYNC
   payload: {
-    fighters: Record<string, Fighter>
+    fighters: Record<string, FighterSync>
+    attacks: Record<string, AttackSync>
   }
 }
 
@@ -31,9 +32,7 @@ export type GameEventSyncMe = {
   event: GameEvent.SYNC_ME
   payload: {
     arenaId: string
-    type: FighterType
-    id: string
-    rotation: number
-    position: number[]
+    fighter: FighterSync
+    attacks: Record<string, AttackSync>
   }
 }
