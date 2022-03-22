@@ -15,7 +15,6 @@
     GameFX,
     GameIMG,
     GameLayer,
-    GameScreen,
   } from 'core/constant'
   import utils from 'core/utils'
 
@@ -33,7 +32,12 @@
 
   function handleCreateAttack() {
     utils.onButtonClick(ButtonCode.SQUARE, () => {
-      if ($gameCtx.me.isReloading || $gameCtx.me.fireTimer !== 1) return
+      if (
+        $gameCtx.me.isReloading ||
+        $gameCtx.me.fireTimer !== 1 ||
+        $gameCtx.me.isDead
+      )
+        return
 
       switch ($gameCtx.me.type) {
         case FighterType.ASSULT: {
@@ -82,6 +86,24 @@
           $gameCtx.monitor.addChild(atk)
           $gameCtx.me.velocity[0] += recoil[0]
           $gameCtx.me.velocity[1] += recoil[1]
+          break
+        }
+      }
+    })
+
+    utils.onButtonClick(ButtonCode.TIMES, () => {
+      const { skill1Timer, skill1CoolDown, rotation, type } = $gameCtx.me
+      if (skill1Timer < skill1CoolDown) return
+
+      switch (type) {
+        case FighterType.ASSULT: {
+          const DASH_FORCE = 6
+
+          const vector = utils.radiansToVector(rotation)
+          const dashVector = vec2.scale([], vector, DASH_FORCE)
+          $gameCtx.me.velocity[0] += dashVector[0]
+          $gameCtx.me.velocity[1] += dashVector[1]
+          $gameCtx.me.skill1Timer = 0
           break
         }
       }

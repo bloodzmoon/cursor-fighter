@@ -77,6 +77,7 @@
       payload: {
         arenaId: $gameCtx.arenaId,
         fighter: {
+          isDead: $gameCtx.me.isDead,
           type: $gameCtx.me.type,
           id: $gameCtx.me.id,
           name: $gameCtx.me.name,

@@ -13,7 +13,7 @@
 
   export let fighter: FighterSync
 
-  let self: PIXI.Sprite
+  let sprite: PIXI.Sprite
   let name: PIXI.Text
 
   let hitBox: PIXI.Circle
@@ -23,6 +23,7 @@
     initFighter()
     $gameCtx.app.ticker.add(handlePlayerMovement)
     $gameCtx.app.ticker.add(handleNamePosition)
+    $gameCtx.app.ticker.add(handlePlayerDead)
     $gameCtx.app.ticker.add(debugDraw)
   })
 
@@ -30,7 +31,7 @@
     $gameCtx.app.ticker.remove(handlePlayerMovement)
     $gameCtx.app.ticker.remove(handleNamePosition)
     $gameCtx.app.ticker.remove(debugDraw)
-    $gameCtx.monitor.removeChild(self)
+    $gameCtx.monitor.removeChild(sprite)
     $gameCtx.monitor.removeChild(name)
     $gameCtx.monitor.removeChild(hitBoxOutline)
   })
@@ -38,14 +39,14 @@
   function initFighter() {
     switch (fighter.type) {
       case FighterType.ASSULT: {
-        self = PIXI.Sprite.from(
+        sprite = PIXI.Sprite.from(
           $gameCtx.app.loader.resources[GameIMG.CURSOR_1].texture
         )
-        self.zIndex = GameLayer.GAME_OBJECT
-        self.x = GameScreen.WIDTH / 2
-        self.y = GameScreen.HEIGHT / 2
-        self.anchor.set(0.5)
-        $gameCtx.monitor.addChild(self)
+        sprite.zIndex = GameLayer.GAME_OBJECT
+        sprite.x = GameScreen.WIDTH / 2
+        sprite.y = GameScreen.HEIGHT / 2
+        sprite.anchor.set(0.5)
+        $gameCtx.monitor.addChild(sprite)
 
         hitBox = new PIXI.Circle(0, 0, 16)
         hitBoxOutline = new PIXI.Graphics()
@@ -67,18 +68,26 @@
 
   function handlePlayerMovement() {
     // player rotation
-    self.rotation = fighter.rotation
+    sprite.rotation = fighter.rotation
 
     // player movement
-    self.x = fighter.position[0]
-    self.y = fighter.position[1]
-    hitBox.x = self.x
-    hitBox.y = self.y
+    sprite.x = fighter.position[0]
+    sprite.y = fighter.position[1]
+    hitBox.x = sprite.x
+    hitBox.y = sprite.y
   }
 
   function handleNamePosition() {
-    name.x = self.x
-    name.y = self.y + 28
+    name.x = sprite.x
+    name.y = sprite.y + 28
+  }
+
+  function handlePlayerDead() {
+    if (fighter.isDead) {
+      const deadFilter = new PIXI.filters.ColorMatrixFilter()
+      deadFilter.brightness(0.2, false)
+      sprite.filters = [deadFilter]
+    }
   }
 
   function debugDraw() {

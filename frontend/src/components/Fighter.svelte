@@ -18,6 +18,7 @@
     initFighter()
     $gameCtx.app.ticker.add(handlePlayerMovement)
     $gameCtx.app.ticker.add(handleNamePosition)
+    $gameCtx.app.ticker.add(handlePlayerDeath)
     $gameCtx.app.ticker.add(debugDraw)
   })
 
@@ -153,6 +154,18 @@
   function handleNamePosition() {
     name.x = $gameCtx.me.position[0]
     name.y = $gameCtx.me.position[1] + 28
+  }
+
+  function handlePlayerDeath() {
+    if (!$gameCtx.me.isDead && $gameCtx.me.health === 0) {
+      clearInterval(interval)
+      $gameCtx.me.isDead = true
+      $gameCtx.me.health = 0
+
+      const deadFilter = new PIXI.filters.ColorMatrixFilter()
+      deadFilter.brightness(0.2, false)
+      sprite.filters = [deadFilter]
+    }
   }
 
   function debugDraw() {

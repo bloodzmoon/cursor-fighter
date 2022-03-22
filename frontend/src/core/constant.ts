@@ -120,6 +120,7 @@ export type AttackPistol = BaseAttack & {
 }
 
 export type FighterSync = {
+  isDead: boolean
   type: FighterType
   id: string
   name: string
@@ -131,6 +132,7 @@ export type FighterSync = {
 export type Fighter = {
   _socket?: WebSocket
   type: FighterType
+  isDead: boolean
   id: string
   name: string
   rotation: number

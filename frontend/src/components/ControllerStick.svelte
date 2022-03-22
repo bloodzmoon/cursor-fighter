@@ -47,6 +47,7 @@
     sound.play(GameFX.CONTROLLER_TAP)
 
     // Update controller context
+    if ($gameCtx.me.isDead) return
     if (code === ButtonCode.ANALOG_LEFT) {
       $controllerCtx[code] = [0, 0]
     }
@@ -58,7 +59,6 @@
 
     const diff = vec2.sub([], [mousePos.x, mousePos.y], position)
     const diffLength = vec2.len(diff)
-    $controllerCtx[code] = diff
 
     if (diffLength > DRAG_RADIUS) {
       const radians = Math.atan2(
@@ -73,6 +73,7 @@
     }
 
     // Update controller context
+    if ($gameCtx.me.isDead) return
     if (code === ButtonCode.ANALOG_LEFT) {
       $controllerCtx[code] = diff
     } else if (code === ButtonCode.ANALOG_RIGHT) {

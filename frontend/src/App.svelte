@@ -30,6 +30,13 @@
   <div class="loader">{`{}`}</div>
 {/if}
 
+<span id="version">
+  version 1.0.0
+  <br />
+  Created by
+  <a href="https://github.com/bloodzmoon" target="_blank">Bloodzmoon</a>
+</span>
+
 <style>
   .loader {
     color: var(--light100);
@@ -44,5 +51,23 @@
     to {
       transform: rotate(360deg);
     }
+  }
+
+  #version {
+    position: fixed;
+    color: white;
+    bottom: 2rem;
+    right: 1rem;
+    text-align: right;
+  }
+
+  #version a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #version a:hover {
+    cursor: pointer;
+    text-decoration: underline;
   }
 </style>

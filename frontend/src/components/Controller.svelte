@@ -25,8 +25,10 @@
   })
 
   function handleButtonClick(code: ButtonCode) {
-    $controllerCtx[code] = true
     sound.play(GameFX.CONTROLLER_TAP)
+    if ($gameCtx.me.isDead) return
+
+    $controllerCtx[code] = true
   }
 </script>
 

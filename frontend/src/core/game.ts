@@ -95,6 +95,7 @@ function createGameContext() {
     attacks: <Record<string, AttackSync>>{},
     me: <Fighter>{
       _socket: null,
+      isDead: false,
       id: '',
       name: '',
       position: [0, 0],

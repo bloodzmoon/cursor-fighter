@@ -31,6 +31,10 @@
   let gemSkillUlt: PIXI.Sprite
   let gemSkillUltMask: PIXI.Graphics
 
+  let resultUI: PIXI.Container
+  let resultText1: PIXI.Text
+  let resultText2: PIXI.Text
+
   onMount(() => {
     touchPad = new PIXI.Container()
     touchPad.zIndex = LAYER
@@ -39,11 +43,14 @@
 
     loadingUI = new PIXI.Container()
     fightUI = new PIXI.Container()
+    resultUI = new PIXI.Container()
     touchPad.addChild(loadingUI)
     touchPad.addChild(fightUI)
+    touchPad.addChild(resultUI)
 
     initFightUI()
     initLoadingUI()
+    initResultUI()
 
     $gameCtx.app.ticker.add(handleUI)
     $gameCtx.app.ticker.add(handleFighterUI)
@@ -139,17 +146,53 @@
     fightUI.addChild(uiOutline)
   }
 
+  function initResultUI() {
+    resultText1 = new PIXI.Text('', {
+      fontFamily: 'Pokemon',
+      fontSize: 26,
+      fill: 0xffffff,
+    })
+    resultText1.anchor.set(0.5)
+    resultText1.position.set(
+      TouchPadSize.WIDTH / 2,
+      TouchPadSize.HEIGHT / 2 - 15
+    )
+    resultUI.addChild(resultText1)
+
+    resultText2 = new PIXI.Text('', {
+      fontFamily: 'Pokemon',
+      fontSize: 20,
+      fill: 0xffffff,
+    })
+    resultText2.anchor.set(0.5)
+    resultText2.position.set(
+      TouchPadSize.WIDTH / 2,
+      TouchPadSize.HEIGHT / 2 + 15
+    )
+    resultUI.addChild(resultText2)
+  }
+
   function handleUI(dt: number) {
     if ($gameCtx.isControllerLoading) {
       loadingIcon.rotation += 0.1 * dt
       loadingUI.visible = true
       fightUI.visible = false
+      resultUI.visible = false
     } else if ($gameCtx.scene === GameScene.PLAY_DEATH_MATCH) {
       loadingUI.visible = false
       fightUI.visible = true
+      resultUI.visible = false
+
+      if ($gameCtx.me.isDead) {
+        fightUI.visible = false
+        resultUI.visible = true
+        resultText1.text = '< GAMEOVER >'
+        resultText2.text = 'YOU DIED'
+      }
     } else {
       loadingUI.visible = false
       fightUI.visible = false
+      resultUI.visible = false
     }
   }
 
