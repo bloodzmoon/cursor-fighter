@@ -157,8 +157,6 @@ export type Fighter = {
   isReloading: boolean
 
   attacks: Record<string, Attack>
-  getHitDelay: number
-  getHitTimer: number
 }
 
 export enum FighterType {

@@ -58,19 +58,16 @@
         break
       }
     }
-    $gameCtx.me.getHitTimer = 0
-    $gameCtx.me.getHitDelay = 0.1
 
     sprite.zIndex = GameLayer.GAME_OBJECT
     sprite.anchor.set(0.5)
     $gameCtx.monitor.addChild(sprite)
 
     const INTERVAL_RATE = 100
+    const RATE = 1000 / INTERVAL_RATE
     interval = setInterval(() => {
-      const rate = 1000 / INTERVAL_RATE
-      handleSkillCoolDown(rate)
-      handleHealthRegen(rate)
-      handleGetHitDelay(rate)
+      handleSkillCoolDown(RATE)
+      handleHealthRegen(RATE)
     }, INTERVAL_RATE)
 
     name = new PIXI.Text($gameCtx.me.name, {
@@ -150,14 +147,6 @@
       $gameCtx.me.fireTimer + (1 / rate) * $gameCtx.me.fireRate,
       0,
       1
-    )
-  }
-
-  function handleGetHitDelay(rate: number) {
-    $gameCtx.me.getHitTimer = clamp(
-      $gameCtx.me.getHitTimer + 1 / rate,
-      0,
-      $gameCtx.me.getHitDelay
     )
   }
 

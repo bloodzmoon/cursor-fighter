@@ -16,17 +16,23 @@
   let self: PIXI.Sprite
   let name: PIXI.Text
 
+  let hitBox: PIXI.Circle
+  let hitBoxOutline: PIXI.Graphics
+
   onMount(() => {
     initFighter()
     $gameCtx.app.ticker.add(handlePlayerMovement)
     $gameCtx.app.ticker.add(handleNamePosition)
+    $gameCtx.app.ticker.add(debugDraw)
   })
 
   onDestroy(() => {
     $gameCtx.app.ticker.remove(handlePlayerMovement)
     $gameCtx.app.ticker.remove(handleNamePosition)
+    $gameCtx.app.ticker.remove(debugDraw)
     $gameCtx.monitor.removeChild(self)
     $gameCtx.monitor.removeChild(name)
+    $gameCtx.monitor.removeChild(hitBoxOutline)
   })
 
   function initFighter() {
@@ -40,6 +46,11 @@
         self.y = GameScreen.HEIGHT / 2
         self.anchor.set(0.5)
         $gameCtx.monitor.addChild(self)
+
+        hitBox = new PIXI.Circle(0, 0, 16)
+        hitBoxOutline = new PIXI.Graphics()
+        hitBoxOutline.zIndex = GameLayer.GAME_UI
+        $gameCtx.monitor.addChild(hitBoxOutline)
         break
       }
     }
@@ -61,10 +72,21 @@
     // player movement
     self.x = fighter.position[0]
     self.y = fighter.position[1]
+    hitBox.x = self.x
+    hitBox.y = self.y
   }
 
   function handleNamePosition() {
     name.x = self.x
     name.y = self.y + 28
+  }
+
+  function debugDraw() {
+    if (!$gameCtx.isDebug) {
+      hitBoxOutline.clear()
+      return
+    }
+
+    hitBoxOutline.clear().beginFill(0x00ff00, 0.3).drawShape(hitBox).endFill()
   }
 </script>
