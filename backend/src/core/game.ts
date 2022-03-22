@@ -91,6 +91,21 @@ const onGameEvent = (socket: WebSocket, app: Server, message: string) => {
       }
       break
     }
+
+    case GameEvent.HIT_ME: {
+      const { arenaId, fighterId, damage, recoil } = msg.payload
+      const _fighter = get(ARENAS, [arenaId, 'fighters', fighterId])
+
+      const response: MessageObject = {
+        event: GameEvent.HIT,
+        payload: {
+          damage,
+          recoil,
+        },
+      }
+      _fighter?._socket.send(JSON.stringify(response))
+      break
+    }
   }
 }
 

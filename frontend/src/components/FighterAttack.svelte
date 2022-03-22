@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import { nanoid } from 'nanoid'
-  import { clamp, omit } from 'lodash'
+  import { clamp } from 'lodash'
   import { sound } from '@pixi/sound'
   import { MotionBlurFilter } from '@pixi/filter-motion-blur'
   import * as PIXI from 'pixi.js'
@@ -44,6 +44,7 @@
 
           const ATK_SPEED = 20
           const ATK_RECOIL = 0.01
+          const ATK_DAMAGE = 12
 
           sound.play(GameFX.ATK_PISTOL, { volume: 0.5 })
           $gameCtx.me.ammo = clamp($gameCtx.me.ammo - 1, 0, $gameCtx.me.maxAmmo)
@@ -61,24 +62,34 @@
           atk.position.set(fighter.position[0], fighter.position[1])
           atk.rotation = fighter.rotation
           atk.filters = [new MotionBlurFilter(atkVector)]
+          const hitBox = new PIXI.Rectangle(atk.x, atk.y, 12, 4)
 
-          $gameCtx.monitor.addChild(atk)
+          const recoil = vec2.negate([], atkVector)
+          vec2.scale(recoil, recoil, ATK_RECOIL)
+
           const attackId = nanoid(10)
           $gameCtx.me.attacks[attackId] = {
             id: attackId,
             fighterId: fighter.id,
             type: AttackType.PISTOL,
             sprite: atk,
+            hitBox,
             velocity: atkVector,
+            recoil: vec2.scale([], atkVector, ATK_RECOIL),
+            damage: ATK_DAMAGE,
           }
 
-          const recoil = vec2.negate([], atkVector)
-          vec2.scale(recoil, recoil, ATK_RECOIL)
+          $gameCtx.monitor.addChild(atk)
           $gameCtx.me.velocity[0] += recoil[0]
           $gameCtx.me.velocity[1] += recoil[1]
           break
         }
       }
+    })
+
+    utils.onButtonClick(ButtonCode.MENU_LEFT, () => {
+      $gameCtx.isDebug = !$gameCtx.isDebug
+      console.log('DEBUG', $gameCtx.isDebug)
     })
   }
 
@@ -110,19 +121,11 @@
     for (const [attackId, attack] of Object.entries($gameCtx.me.attacks)) {
       switch (attack.type) {
         case AttackType.PISTOL: {
-          $gameCtx.me.attacks[attackId].sprite.x += attack.velocity[0]
-          $gameCtx.me.attacks[attackId].sprite.y += attack.velocity[1]
-
-          // clean up TODO: change to collision detect
-          if (
-            attack.sprite.x < 0 ||
-            attack.sprite.x > GameScreen.WIDTH ||
-            attack.sprite.y < 0 ||
-            attack.sprite.y > GameScreen.HEIGHT
-          ) {
-            $gameCtx.monitor.removeChild(attack.sprite)
-            $gameCtx.me.attacks = omit($gameCtx.me.attacks, attackId)
-          }
+          const { hitBox } = $gameCtx.me.attacks[attackId]
+          $gameCtx.me.attacks[attackId].hitBox.x += attack.velocity[0]
+          $gameCtx.me.attacks[attackId].hitBox.y += attack.velocity[1]
+          $gameCtx.me.attacks[attackId].sprite.x = hitBox.x
+          $gameCtx.me.attacks[attackId].sprite.y = hitBox.y
           break
         }
       }

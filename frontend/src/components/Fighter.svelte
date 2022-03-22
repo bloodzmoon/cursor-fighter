@@ -6,31 +6,27 @@
 
   import { controllerCtx } from 'core/controller'
   import { gameCtx } from 'core/game'
-  import {
-    GameLayer,
-    GameScreen,
-    ButtonCode,
-    GameIMG,
-    FighterType,
-  } from 'core/constant'
+  import { GameLayer, ButtonCode, GameIMG, FighterType } from 'core/constant'
 
-  let self: PIXI.Sprite
+  let sprite: PIXI.Sprite
   let name: PIXI.Text
-  let healthRegenInterval: ReturnType<typeof setInterval>
-  let skillInterval: ReturnType<typeof setInterval>
+  let interval: ReturnType<typeof setInterval>
+
+  let hitBoxOutline: PIXI.Graphics
 
   onMount(() => {
     initFighter()
     $gameCtx.app.ticker.add(handlePlayerMovement)
     $gameCtx.app.ticker.add(handleNamePosition)
+    $gameCtx.app.ticker.add(debugDraw)
   })
 
   onDestroy(() => {
-    clearInterval(healthRegenInterval)
-    clearInterval(skillInterval)
+    clearInterval(interval)
     $gameCtx.app.ticker.remove(handlePlayerMovement)
     $gameCtx.app.ticker.remove(handleNamePosition)
-    $gameCtx.monitor.removeChild(self)
+    $gameCtx.app.ticker.remove(debugDraw)
+    $gameCtx.monitor.removeChild(sprite)
     $gameCtx.monitor.removeChild(name)
   })
 
@@ -38,14 +34,15 @@
     switch ($gameCtx.me.type) {
       case FighterType.ASSULT: {
         $gameCtx.me.maxHealth = 100
-        $gameCtx.me.healthRegen = 2
+        $gameCtx.me.healthRegen = 0.5
         $gameCtx.me.skill1CoolDown = 4
         $gameCtx.me.skill2CoolDown = 8
         $gameCtx.me.skillUltCoolDown = 30
         $gameCtx.me.maxAmmo = 12
-        $gameCtx.me.fireRate = 1.6
+        $gameCtx.me.fireRate = 1.8
         $gameCtx.me.speed = 0.1
         $gameCtx.me.reloadDelay = 2.4
+        $gameCtx.me.hitBox.radius = 16
 
         $gameCtx.me.health = $gameCtx.me.maxHealth
         $gameCtx.me.ammo = $gameCtx.me.maxAmmo
@@ -55,20 +52,27 @@
         $gameCtx.me.fireTimer = 1
         $gameCtx.me.reloadTimer = 0
 
-        self = PIXI.Sprite.from(
+        sprite = PIXI.Sprite.from(
           $gameCtx.app.loader.resources[GameIMG.CURSOR_1].texture
         )
-        self.zIndex = GameLayer.GAME_OBJECT
-        self.x = GameScreen.WIDTH / 2
-        self.y = GameScreen.HEIGHT / 2
-        self.anchor.set(0.5)
-        $gameCtx.monitor.addChild(self)
         break
       }
     }
+    $gameCtx.me.getHitTimer = 0
+    $gameCtx.me.getHitDelay = 0.1
 
-    skillInterval = setInterval(handleSkillCoolDown, 100)
-    healthRegenInterval = setInterval(handleHealthRegen, 1000)
+    sprite.zIndex = GameLayer.GAME_OBJECT
+    sprite.anchor.set(0.5)
+    $gameCtx.monitor.addChild(sprite)
+
+    const INTERVAL_RATE = 100
+    interval = setInterval(() => {
+      const rate = 1000 / INTERVAL_RATE
+      handleSkillCoolDown(rate)
+      handleHealthRegen(rate)
+      handleGetHitDelay(rate)
+    }, INTERVAL_RATE)
+
     name = new PIXI.Text($gameCtx.me.name, {
       fontFamily: 'Pokemon',
       fontSize: 20,
@@ -76,82 +80,102 @@
     })
     name.zIndex = GameLayer.GAME_UI
     name.anchor.set(0.5)
-    name.text = $gameCtx.me.name
     $gameCtx.monitor.addChild(name)
+
+    hitBoxOutline = new PIXI.Graphics()
+    hitBoxOutline.zIndex = GameLayer.GAME_UI
+    $gameCtx.monitor.addChild(hitBoxOutline)
   }
 
   function handlePlayerMovement() {
+    const { position, rotation, velocity, speed } = $gameCtx.me
+
     // player rotation
-    self.rotation = $controllerCtx[ButtonCode.ANALOG_RIGHT]
-    $gameCtx.me.rotation = self.rotation
+    $gameCtx.me.rotation = $controllerCtx[ButtonCode.ANALOG_RIGHT]
 
     // player movement
-    const velocity = $gameCtx.me.velocity
     const analogPos = $controllerCtx[ButtonCode.ANALOG_LEFT]
-    const controlPos = vec2.add([], analogPos, [self.x, self.y])
-    const delta = vec2.sub([], controlPos, [self.x, self.y])
+    const controlPos = vec2.add([], analogPos, position)
+    const delta = vec2.sub([], controlPos, position)
     vec2.normalize(delta, delta)
-    vec2.scaleAndAdd(velocity, velocity, delta, $gameCtx.me.speed)
+    $gameCtx.me.velocity = vec2.scaleAndAdd([], velocity, delta, speed)
 
-    if (self.x < 0 || self.x > GameScreen.WIDTH) {
-      self.x = clamp(self.x, 0, GameScreen.WIDTH)
-      velocity[0] *= -1
-    }
-    if (self.y < 0 || self.y > GameScreen.HEIGHT) {
-      self.y = clamp(self.y, 0, GameScreen.HEIGHT)
-      velocity[1] *= -1
-    }
-    velocity[0] *= 0.98
-    velocity[1] *= 0.98
-    self.x += velocity[0]
-    self.y += velocity[1]
+    $gameCtx.me.position[0] += velocity[0]
+    $gameCtx.me.position[1] += velocity[1]
+    $gameCtx.me.velocity[0] *= 0.98
+    $gameCtx.me.velocity[1] *= 0.98
+    $gameCtx.me.hitBox.x = position[0]
+    $gameCtx.me.hitBox.y = position[1]
 
-    $gameCtx.me.position = [self.x, self.y]
-    $gameCtx.me.velocity = velocity
+    // Update sprite
+    sprite.rotation = rotation
+    sprite.x = position[0]
+    sprite.y = position[1]
   }
 
-  function handleHealthRegen() {
+  function handleHealthRegen(rate: number) {
     $gameCtx.me.health = clamp(
-      $gameCtx.me.health + $gameCtx.me.healthRegen,
+      $gameCtx.me.health + $gameCtx.me.healthRegen / rate,
       0,
       $gameCtx.me.maxHealth
     )
   }
 
-  function handleSkillCoolDown() {
+  function handleSkillCoolDown(rate: number) {
     $gameCtx.me.skill1Timer = clamp(
-      $gameCtx.me.skill1Timer + 0.1,
+      $gameCtx.me.skill1Timer + 1 / rate,
       0,
       $gameCtx.me.skill1CoolDown
     )
 
     $gameCtx.me.skill2Timer = clamp(
-      $gameCtx.me.skill2Timer + 0.1,
+      $gameCtx.me.skill2Timer + 1 / rate,
       0,
       $gameCtx.me.skill2CoolDown
     )
 
     $gameCtx.me.skillUltTimer = clamp(
-      $gameCtx.me.skillUltTimer + 0.1,
+      $gameCtx.me.skillUltTimer + 1 / rate,
       0,
       $gameCtx.me.skillUltCoolDown
     )
 
     $gameCtx.me.reloadTimer = clamp(
-      $gameCtx.me.reloadTimer + 0.1,
+      $gameCtx.me.reloadTimer + 1 / rate,
       0,
       $gameCtx.me.reloadDelay
     )
 
     $gameCtx.me.fireTimer = clamp(
-      $gameCtx.me.fireTimer + 0.1 * $gameCtx.me.fireRate,
+      $gameCtx.me.fireTimer + (1 / rate) * $gameCtx.me.fireRate,
       0,
       1
+    )
+  }
+
+  function handleGetHitDelay(rate: number) {
+    $gameCtx.me.getHitTimer = clamp(
+      $gameCtx.me.getHitTimer + 1 / rate,
+      0,
+      $gameCtx.me.getHitDelay
     )
   }
 
   function handleNamePosition() {
     name.x = $gameCtx.me.position[0]
     name.y = $gameCtx.me.position[1] + 28
+  }
+
+  function debugDraw() {
+    if (!$gameCtx.isDebug) {
+      hitBoxOutline.clear()
+      return
+    }
+
+    hitBoxOutline
+      .clear()
+      .beginFill(0x00ff00, 0.3)
+      .drawShape($gameCtx.me.hitBox)
+      .endFill()
   }
 </script>

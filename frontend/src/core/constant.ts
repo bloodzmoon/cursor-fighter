@@ -83,21 +83,40 @@ export enum AttackType {
   PISTOL,
 }
 
-export type AttackSync = {
+export type AttackSync = AttackPistolSync
+
+export type BaseAttackSync = {
   id: string
   fighterId: string
   type: AttackType
   velocity: number[]
   rotation: number
   position: number[]
+  damage: number
 }
 
-export type Attack = {
+export type AttackPistolSync = BaseAttackSync & {
+  type: AttackType.PISTOL
+  width: number
+  height: number
+}
+
+export type Attack = AttackPistol
+
+export type BaseAttack = {
   id: string
   fighterId: string
   type: AttackType
   velocity: number[]
   sprite: PIXI.Sprite
+  hitBox: PIXI.IShape
+  damage: number
+  recoil: number[]
+}
+
+export type AttackPistol = BaseAttack & {
+  type: AttackType.PISTOL
+  hitBox: PIXI.Rectangle
 }
 
 export type FighterSync = {
@@ -106,6 +125,7 @@ export type FighterSync = {
   name: string
   rotation: number
   position: number[]
+  hitBoxRadius: number
 }
 
 export type Fighter = {
@@ -117,6 +137,7 @@ export type Fighter = {
   position: number[]
   speed: number
   velocity: number[]
+  hitBox: PIXI.Circle
 
   health: number
   maxHealth: number
@@ -136,6 +157,8 @@ export type Fighter = {
   isReloading: boolean
 
   attacks: Record<string, Attack>
+  getHitDelay: number
+  getHitTimer: number
 }
 
 export enum FighterType {

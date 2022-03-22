@@ -82,6 +82,7 @@ function createGameContext() {
     isFontLoaded: false,
     isMonitorActive: true,
     isControllerLoading: false,
+    isDebug: false,
 
     scene: GameScene.INIT,
     app,
@@ -99,6 +100,7 @@ function createGameContext() {
       position: [0, 0],
       velocity: [0, 0],
       rotation: 0,
+      hitBox: new PIXI.Circle(),
       type: FighterType.ASSULT,
       ammo: 0,
       maxAmmo: 0,
